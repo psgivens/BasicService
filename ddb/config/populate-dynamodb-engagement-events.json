@@ -1,0 +1,123 @@
+{
+   "EngagementEventsTable" : [
+      {
+         "PutRequest": {
+            "Item": {
+               "EngagementEventId" : {
+                  "S": "4e53920c-505a-4a90-a694-b9300791f0ae"
+               },
+               "EngagementVersion" : {
+                  "S": "1"
+               },
+               "TimeStamp": {
+                  "S": "Now"
+               },
+               "Event": {
+                  "M": {
+                     "Action": {
+                        "S": "Create"
+                     },
+                     "Region" : {
+                        "S": "Narnia"
+                     },
+                     "TeamsName" : {
+                        "S": "flytrap"
+                     },
+                     "SFDCID": {
+                        "S": "Project-1234"
+                     },
+                     "ProjectName": {
+                        "S": "Super fancy infrastructure engagement"
+                     },
+                     "Owner": {
+                        "S": "givepac"
+                     }
+                  }
+               }
+            }
+         }
+      },
+      {
+         "PutRequest": {
+            "Item": {
+               "EngagementEventId" : {
+                  "S": "4e53920c-505a-4a90-a694-b9300791f0ae"
+               },
+               "EngagementVersion" : {
+                  "S": "2"
+               },
+               "TimeStamp": {
+                  "S": "Now+1"
+               },
+               "Event": {
+                  "M": {
+                     "Action": {
+                        "S": "Update"
+                     },
+                     "Payload" : {
+                        "M": {
+                           "Region" : {
+                              "S": "Narnia"
+                           },
+                           "TeamsName" : {
+                              "S": "flytrap"
+                           },
+                           "SFDCID": {
+                              "S": "Project-1234"
+                           },
+                           "ProjectName": {
+                              "S": "Super fancy infrastructure engagement"
+                           },
+                           "Owner": {
+                              "S": "givepac"
+                           }
+                        }
+                     }
+                  }
+               }
+            }
+         }
+      },
+      {
+         "PutRequest": {
+            "Item": {
+               "EngagementEventId" : {
+                  "S": "4e53920c-505a-4a90-a694-b9300791f0ae"
+               },
+               "EngagementVersion" : {
+                  "S": "3"
+               },
+               "TimeStamp": {
+                  "S": "Now+2"
+               },
+               "Event": {
+                  "M": {
+                     "Action": {
+                        "S": "Create"
+                     },
+                     "Payload" : {
+                        "M": {
+                           "Region" : {
+                              "S": "Narnia"
+                           },
+                           "TeamsName" : {
+                              "S": "flytrap"
+                           },
+                           "SFDCID": {
+                              "S": "Project-1234"
+                           },
+                           "ProjectName": {
+                              "S": "Super fancy infrastructure engagement"
+                           },
+                           "Owner": {
+                              "S": "givepac"
+                           }
+                        }
+                     }
+                  }
+               }
+            }
+         }
+      }
+   ]
+}

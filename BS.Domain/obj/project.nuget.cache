@@ -1,0 +1,12 @@
+{
+  "version": 2,
+  "dgSpecHash": "z3ufnr5jEU6d/MLFuSjV6s4Vkzi+Vq8BURRugzju2pySwhIAQPmRHUCas7ZIrKEMp1SU4dTNc5xi4WLwHwp/yA==",
+  "success": true,
+  "projectFilePath": "/workspace/BS.Domain/BS.Domain.fsproj",
+  "expectedPackageFiles": [
+    "/home/vscode/.nuget/packages/fsharp.core/4.7.2/fsharp.core.4.7.2.nupkg.sha512",
+    "/home/vscode/.nuget/packages/microsoft.netcore.platforms/1.1.0/microsoft.netcore.platforms.1.1.0.nupkg.sha512",
+    "/home/vscode/.nuget/packages/netstandard.library/2.0.3/netstandard.library.2.0.3.nupkg.sha512"
+  ],
+  "logs": []
+}

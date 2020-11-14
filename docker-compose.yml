@@ -1,0 +1,60 @@
+version: "3.8"
+services:
+  bs-service:
+    build:
+      context: ./.devcontainer
+      dockerfile:  ./Dockerfile
+      args:
+        VARIANT: 3.1
+    volumes:
+      - ./:/workspace:cached
+      - bs-api-bin:/workspace/BS.API/bin
+      - bs-api-obj:/workspace/BS.API/obj
+
+      - bs-domain-bin:/workspace/BS.Domain/bin
+      - bs-domain-obj:/workspace/BS.Domain/obj
+
+      - bs-domain-dal-bin:/workspace/BS.Domain.DAL/bin
+      - bs-domain-dal-obj:/workspace/BS.Domain.DAL/obj
+
+      - bs-unit-tests-bin:/workspace/BS.UnitTests/bin
+      - bs-unit-tests-obj:/workspace/BS.UnitTests/obj
+
+      - bs-cli-bin:/workspace/BS.CLI/bin
+      - bs-cli-obj:/workspace/BS.CLI/obj
+
+  ddb-local:
+    build:
+      context: ./ddb
+      dockerfile:  ./.devcontainer/Dockerfile
+      args:
+        VARIANT: 3
+    volumes:
+      - ./:/workspace
+      - ddb-data:/workspace/data
+      
+  web-local:
+    build:
+      context: ./web
+      dockerfile:  ./.devcontainer/Dockerfile
+      args:
+        VARIANT: 12
+    volumes:
+      - ./:/workspace
+      - web-node_modules:/workspace/web/node_modules
+
+volumes: 
+  bs-api-bin:
+  bs-api-obj:
+  bs-domain-bin:
+  bs-domain-obj:
+  bs-domain-dal-bin:
+  bs-domain-dal-obj:
+  bs-unit-tests-bin:
+  bs-unit-tests-obj:
+  bs-cli-bin:
+  bs-cli-obj:
+
+  web-node_modules:
+  ddb-data:
+
