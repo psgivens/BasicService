@@ -11,6 +11,9 @@ open Amazon.DynamoDBv2.Model
 open System.Collections.Generic
 open BS.Domain.EngagementManagement
 
+open System.IO
+open System.IO.Compression
+
 module FirstDAL = 
 
     type EngagementDetails1 = {
