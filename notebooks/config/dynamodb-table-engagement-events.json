@@ -1,0 +1,27 @@
+{
+  "TableName": "EngagementEventsTable",
+  "ProvisionedThroughput": {
+    "ReadCapacityUnits": 5,
+    "WriteCapacityUnits": 5
+  },
+  "AttributeDefinitions": [
+    {
+      "AttributeName": "EngagementEventId",
+      "AttributeType": "S"
+    },
+    {
+      "AttributeName": "EngagementVersion",
+      "AttributeType": "S"
+    }
+  ],
+  "KeySchema": [
+    {
+      "AttributeName": "EngagementEventId",
+      "KeyType": "HASH"
+    },
+    {
+      "AttributeName": "EngagementVersion",
+      "KeyType": "RANGE"
+    }
+  ]  
+}

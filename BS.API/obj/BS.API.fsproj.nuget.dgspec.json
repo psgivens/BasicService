@@ -112,6 +112,16 @@
       "frameworks": {
         "netstandard2.0": {
           "dependencies": {
+            "AWSSDK.Core": {
+              "target": "Package",
+              "version": "[3.5.1.36, )",
+              "generatePathProperty": true
+            },
+            "AWSSDK.DynamoDBv2": {
+              "target": "Package",
+              "version": "[3.5.3.1, )",
+              "generatePathProperty": true
+            },
             "FSharp.Core": {
               "target": "Package",
               "version": "[4.7.2, )",
@@ -122,6 +132,11 @@
               "target": "Package",
               "version": "[2.0.3, )",
               "autoReferenced": true,
+              "generatePathProperty": true
+            },
+            "Newtonsoft.Json": {
+              "target": "Package",
+              "version": "[12.0.3, )",
               "generatePathProperty": true
             }
           },
@@ -176,6 +191,11 @@
               "target": "Package",
               "version": "[2.0.3, )",
               "autoReferenced": true,
+              "generatePathProperty": true
+            },
+            "TaskBuilder.fs": {
+              "target": "Package",
+              "version": "[2.1.0, )",
               "generatePathProperty": true
             }
           },

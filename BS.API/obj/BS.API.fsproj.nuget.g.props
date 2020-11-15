@@ -20,5 +20,7 @@
     <PkgTaskBuilder_fs Condition=" '$(PkgTaskBuilder_fs)' == '' ">/home/vscode/.nuget/packages/taskbuilder.fs/2.1.0</PkgTaskBuilder_fs>
     <PkgNewtonsoft_Json Condition=" '$(PkgNewtonsoft_Json)' == '' ">/home/vscode/.nuget/packages/newtonsoft.json/12.0.3</PkgNewtonsoft_Json>
     <PkgGiraffe Condition=" '$(PkgGiraffe)' == '' ">/home/vscode/.nuget/packages/giraffe/4.1.0</PkgGiraffe>
+    <PkgAWSSDK_Core Condition=" '$(PkgAWSSDK_Core)' == '' ">/home/vscode/.nuget/packages/awssdk.core/3.5.1.36</PkgAWSSDK_Core>
+    <PkgAWSSDK_DynamoDBv2 Condition=" '$(PkgAWSSDK_DynamoDBv2)' == '' ">/home/vscode/.nuget/packages/awssdk.dynamodbv2/3.5.3.1</PkgAWSSDK_DynamoDBv2>
   </PropertyGroup>
 </Project>

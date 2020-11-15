@@ -1,9 +1,11 @@
 {
   "version": 2,
-  "dgSpecHash": "AIiVZyeb6rra9mGrgdKpbHZbWQ1Dv9Uz0FlP1HZR6uh9MxcwzVDa06zkVIRtepbRRsI3sjxJtlOA/jXCm4Zv2A==",
+  "dgSpecHash": "D5/Gtr2EVBGLpGnGGxYuEzVMjx1ahUQ4RuwXVLKsuRUqiL6wnfkpKil7zYs+DYnWZ166DvUOVFwLMohyXpGAZA==",
   "success": true,
   "projectFilePath": "/workspace/BS.API/BS.API.fsproj",
   "expectedPackageFiles": [
+    "/home/vscode/.nuget/packages/awssdk.core/3.5.1.36/awssdk.core.3.5.1.36.nupkg.sha512",
+    "/home/vscode/.nuget/packages/awssdk.dynamodbv2/3.5.3.1/awssdk.dynamodbv2.3.5.3.1.nupkg.sha512",
     "/home/vscode/.nuget/packages/fsharp.core/4.7.2/fsharp.core.4.7.2.nupkg.sha512",
     "/home/vscode/.nuget/packages/giraffe/4.1.0/giraffe.4.1.0.nupkg.sha512",
     "/home/vscode/.nuget/packages/microsoft.io.recyclablememorystream/1.2.2/microsoft.io.recyclablememorystream.1.2.2.nupkg.sha512",

@@ -1,10 +1,15 @@
 {
   "version": 2,
-  "dgSpecHash": "7pcMHuhw04fa+38VGP4+QP5JBB6fS3HGvwlE/MR2vCeItUCv4/UF17p81Mu9/GhbQFuyo8k5N9lUiF8UQIjDPQ==",
+  "dgSpecHash": "2k1v3I8QmzEUEXSO0h8XtfLvZx8RcXTVMSGqcH4/bVVM4xIFLTNtd46yTl4NdFy5KZKhkwJbLoOXHBnQpYcB3A==",
   "success": true,
   "projectFilePath": "/workspace/BS.CLI/BS.CLI.fsproj",
   "expectedPackageFiles": [
-    "/home/vscode/.nuget/packages/fsharp.core/4.7.2/fsharp.core.4.7.2.nupkg.sha512"
+    "/home/vscode/.nuget/packages/awssdk.core/3.5.1.36/awssdk.core.3.5.1.36.nupkg.sha512",
+    "/home/vscode/.nuget/packages/awssdk.dynamodbv2/3.5.3.1/awssdk.dynamodbv2.3.5.3.1.nupkg.sha512",
+    "/home/vscode/.nuget/packages/fsharp.core/4.7.2/fsharp.core.4.7.2.nupkg.sha512",
+    "/home/vscode/.nuget/packages/newtonsoft.json/12.0.3/newtonsoft.json.12.0.3.nupkg.sha512",
+    "/home/vscode/.nuget/packages/system.valuetuple/4.4.0/system.valuetuple.4.4.0.nupkg.sha512",
+    "/home/vscode/.nuget/packages/taskbuilder.fs/2.1.0/taskbuilder.fs.2.1.0.nupkg.sha512"
   ],
   "logs": []
 }

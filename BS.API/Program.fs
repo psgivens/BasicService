@@ -103,7 +103,9 @@ let errorHandler (ex : Exception) (logger : ILogger) =
 // ---------------------------------
 
 let configureCors (builder : CorsPolicyBuilder) =
-    builder.WithOrigins("http://localhost:8080")
+    builder
+           .AllowAnyOrigin()
+            // .WithOrigins("http://localhost:8080")
            .AllowAnyMethod()
            .AllowAnyHeader()
            |> ignore
@@ -114,12 +116,12 @@ let configureApp (app : IApplicationBuilder) =
     | "Development" -> app.UseDeveloperExceptionPage()
     | _ -> app.UseGiraffeErrorHandler(errorHandler))
         // .UseHttpsRedirection()
-        .UseCors(configureCors)
+        // .UseCors(configureCors)
         .UseStaticFiles()
         .UseGiraffe(webApp)
 
 let configureServices (services : IServiceCollection) =
-    services.AddCors()    |> ignore
+    // services.AddCors()    |> ignore
     services.AddGiraffe() |> ignore
 
 let configureLogging (builder : ILoggingBuilder) =

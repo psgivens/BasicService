@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "vN34PS2/Qbf0ZTNQXSNLJmERkm5lZB+ZFSsauQS67Sf7/Ku57fbuXFsT7qkhHFBbv09wtHBAc8n/Q+e5I0j4Ug==",
+  "dgSpecHash": "1MJk8E/PzPsVyxiDMnUqvIzn5lQz1JxtfCO05Oeso7vZsh8caEK0idWjjw+BDRaVSMOjYfa5P/PPQHR6IPCCKg==",
   "success": true,
   "projectFilePath": "/workspace/BS.Domain.DAL/BS.Domain.DAL.fsproj",
   "expectedPackageFiles": [
@@ -12,7 +12,9 @@
     "/home/vscode/.nuget/packages/netstandard.library/2.0.3/netstandard.library.2.0.3.nupkg.sha512",
     "/home/vscode/.nuget/packages/newtonsoft.json/12.0.3/newtonsoft.json.12.0.3.nupkg.sha512",
     "/home/vscode/.nuget/packages/system.runtime.compilerservices.unsafe/4.5.2/system.runtime.compilerservices.unsafe.4.5.2.nupkg.sha512",
-    "/home/vscode/.nuget/packages/system.threading.tasks.extensions/4.5.2/system.threading.tasks.extensions.4.5.2.nupkg.sha512"
+    "/home/vscode/.nuget/packages/system.threading.tasks.extensions/4.5.2/system.threading.tasks.extensions.4.5.2.nupkg.sha512",
+    "/home/vscode/.nuget/packages/system.valuetuple/4.4.0/system.valuetuple.4.4.0.nupkg.sha512",
+    "/home/vscode/.nuget/packages/taskbuilder.fs/2.1.0/taskbuilder.fs.2.1.0.nupkg.sha512"
   ],
   "logs": []
 }

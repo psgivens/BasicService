@@ -42,6 +42,11 @@
               "version": "[2.0.3, )",
               "autoReferenced": true,
               "generatePathProperty": true
+            },
+            "TaskBuilder.fs": {
+              "target": "Package",
+              "version": "[2.1.0, )",
+              "generatePathProperty": true
             }
           },
           "imports": [

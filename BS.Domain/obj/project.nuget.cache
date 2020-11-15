@@ -1,12 +1,14 @@
 {
   "version": 2,
-  "dgSpecHash": "z3ufnr5jEU6d/MLFuSjV6s4Vkzi+Vq8BURRugzju2pySwhIAQPmRHUCas7ZIrKEMp1SU4dTNc5xi4WLwHwp/yA==",
+  "dgSpecHash": "DENn8d6zgy2ms6DFN1dpoeHIVjGroetZVI3prQzRpgdKETEerCL1FZQ15FQWSQ3AiJMQ3X2hmxjmcDRBqajHzA==",
   "success": true,
   "projectFilePath": "/workspace/BS.Domain/BS.Domain.fsproj",
   "expectedPackageFiles": [
     "/home/vscode/.nuget/packages/fsharp.core/4.7.2/fsharp.core.4.7.2.nupkg.sha512",
     "/home/vscode/.nuget/packages/microsoft.netcore.platforms/1.1.0/microsoft.netcore.platforms.1.1.0.nupkg.sha512",
-    "/home/vscode/.nuget/packages/netstandard.library/2.0.3/netstandard.library.2.0.3.nupkg.sha512"
+    "/home/vscode/.nuget/packages/netstandard.library/2.0.3/netstandard.library.2.0.3.nupkg.sha512",
+    "/home/vscode/.nuget/packages/system.valuetuple/4.4.0/system.valuetuple.4.4.0.nupkg.sha512",
+    "/home/vscode/.nuget/packages/taskbuilder.fs/2.1.0/taskbuilder.fs.2.1.0.nupkg.sha512"
   ],
   "logs": []
 }

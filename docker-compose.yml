@@ -6,6 +6,9 @@ services:
       dockerfile:  ./Dockerfile
       args:
         VARIANT: 3.1
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://0.0.0.0:5000
     volumes:
       - ./:/workspace:cached
       - bs-api-bin:/workspace/BS.API/bin
@@ -22,6 +25,18 @@ services:
 
       - bs-cli-bin:/workspace/BS.CLI/bin
       - bs-cli-obj:/workspace/BS.CLI/obj
+
+  notebooks-service:
+    build:
+      context: ./notebooks/
+      dockerfile:  ./.devcontainer/Dockerfile
+      args:
+        VARIANT: 3.1
+    volumes:
+      - ./:/workspace:cached
+    links:
+      - bs-service
+      - ddb-local
 
   ddb-local:
     build:

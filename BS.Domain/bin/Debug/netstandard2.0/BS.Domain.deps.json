@@ -10,7 +10,8 @@
       "BS.Domain/1.0.0": {
         "dependencies": {
           "FSharp.Core": "4.7.2",
-          "NETStandard.Library": "2.0.3"
+          "NETStandard.Library": "2.0.3",
+          "TaskBuilder.fs": "2.1.0"
         },
         "runtime": {
           "BS.Domain.dll": {}
@@ -70,6 +71,20 @@
         "dependencies": {
           "Microsoft.NETCore.Platforms": "1.1.0"
         }
+      },
+      "System.ValueTuple/4.4.0": {},
+      "TaskBuilder.fs/2.1.0": {
+        "dependencies": {
+          "FSharp.Core": "4.7.2",
+          "NETStandard.Library": "2.0.3",
+          "System.ValueTuple": "4.4.0"
+        },
+        "runtime": {
+          "lib/netstandard1.6/TaskBuilder.fs.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
       }
     }
   },
@@ -99,6 +114,20 @@
       "sha512": "sha512-st47PosZSHrjECdjeIzZQbzivYBJFv6P2nv4cj2ypdI204DO+vZ7l5raGMiX4eXMJ53RfOIg+/s4DHVZ54Nu2A==",
       "path": "netstandard.library/2.0.3",
       "hashPath": "netstandard.library.2.0.3.nupkg.sha512"
+    },
+    "System.ValueTuple/4.4.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-BahUww/+mdP4ARCAh2RQhQTg13wYLVrBb9SYVgW8ZlrwjraGCXHGjo0oIiUfZ34LUZkMMR+RAzR7dEY4S1HeQQ==",
+      "path": "system.valuetuple/4.4.0",
+      "hashPath": "system.valuetuple.4.4.0.nupkg.sha512"
+    },
+    "TaskBuilder.fs/2.1.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-SBL6WjMQjc3bxY4lDtw1h7dM+CDbE9Gt1czsaaSDgPzJQYq+bkDXfwI/QXFKHMtisGKXjkDVAVNxS/gQRE44eA==",
+      "path": "taskbuilder.fs/2.1.0",
+      "hashPath": "taskbuilder.fs.2.1.0.nupkg.sha512"
     }
   }
 }

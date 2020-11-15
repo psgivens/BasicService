@@ -1,0 +1,106 @@
+{
+  "TableName": "EngagementEventsTable",
+  "ProvisionedThroughput": {
+    "ReadCapacityUnits": 5,
+    "WriteCapacityUnits": 5
+  },
+  "AttributeDefinitions": [
+    {
+      "AttributeName": "EngagementEventId",
+      "AttributeType": "S"
+    },
+    {
+      "AttributeName": "TeamsName'",
+      "AttributeType": "S"    
+    },
+    {
+      "AttributeName": "Segment",
+      "AttributeType": "S"
+    },
+    {
+      "AttributeName": "SFDCID",
+      "AttributeType": "S"
+    },
+    {
+      "AttributeName": "ProjectManagerAlias",
+      "AttributeType": "S"
+    }
+  ],
+  "KeySchema": [
+    {
+      "AttributeName": "EngagementEventId",
+      "KeyType": "HASH"
+    },
+    {
+      "AttributeName": "EngagementVersion",
+      "KeyType": "Range"
+    }
+  ],
+  "GlobalSecondaryIndexes": [
+    {
+      "IndexName": "SalesforceIndex",
+      "KeySchema": [
+        {
+          "AttributeName": "SFDCID",
+          "KeyType": "HASH"
+        }
+      ],
+      "Projection": {
+        "ProjectionType": "ALL"
+      },
+      "ProvisionedThroughput": {
+        "ReadCapacityUnits": 5,
+        "WriteCapacityUnits": 5
+      }
+    },
+    {
+      "IndexName": "ProjectManagerIndex",
+      "KeySchema": [
+        {
+          "AttributeName": "ProjectManagerAlias",
+          "KeyType": "HASH"
+        }
+      ],
+      "Projection": {
+        "ProjectionType": "ALL"
+      },
+      "ProvisionedThroughput": {
+        "ReadCapacityUnits": 5,
+        "WriteCapacityUnits": 5
+      }
+    }
+    ,
+    {
+      "IndexName": "TeamsIndex",
+      "KeySchema": [
+        {
+          "AttributeName": "Teams",
+          "KeyType": "HASH"
+        }
+      ],
+      "Projection": {
+        "ProjectionType": "ALL"
+      },
+      "ProvisionedThroughput": {
+        "ReadCapacityUnits": 5,
+        "WriteCapacityUnits": 5
+      }
+    },
+    {
+      "IndexName": "SegmentIndex",
+      "KeySchema": [
+        {
+          "AttributeName": "SegmentAlias",
+          "KeyType": "HASH"
+        }
+      ],
+      "Projection": {
+        "ProjectionType": "ALL"
+      },
+      "ProvisionedThroughput": {
+        "ReadCapacityUnits": 5,
+        "WriteCapacityUnits": 5
+      }
+    }
+  ]
+}

@@ -29,4 +29,15 @@ RUN aws configure set aws_access_key_id default_access_key \
     && aws configure set aws_secret_access_key default_secret_key \
     && aws configure set default.region us-west-1     
 
+# Install Powershell
+RUN sudo apt-get update \
+    && sudo apt-get install -y wget apt-transport-https software-properties-common 
+
+WORKDIR /tmp
+RUN wget -q https://packages.microsoft.com/config/ubuntu/18.04/packages-microsoft-prod.deb \
+    && sudo dpkg -i packages-microsoft-prod.deb \
+    && sudo apt-get update \
+    && sudo add-apt-repository universe \
+    && sudo apt-get install -y powershell
+
 CMD ["/bin/sleep", "10000000"]

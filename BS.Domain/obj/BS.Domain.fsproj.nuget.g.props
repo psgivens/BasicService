@@ -18,5 +18,6 @@
   <PropertyGroup Condition=" '$(ExcludeRestorePackageImports)' != 'true' ">
     <PkgNETStandard_Library Condition=" '$(PkgNETStandard_Library)' == '' ">/home/vscode/.nuget/packages/netstandard.library/2.0.3</PkgNETStandard_Library>
     <PkgFSharp_Core Condition=" '$(PkgFSharp_Core)' == '' ">/home/vscode/.nuget/packages/fsharp.core/4.7.2</PkgFSharp_Core>
+    <PkgTaskBuilder_fs Condition=" '$(PkgTaskBuilder_fs)' == '' ">/home/vscode/.nuget/packages/taskbuilder.fs/2.1.0</PkgTaskBuilder_fs>
   </PropertyGroup>
 </Project>
