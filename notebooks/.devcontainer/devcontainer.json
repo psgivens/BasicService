@@ -56,6 +56,8 @@
 	// Use 'postCreateCommand' to run commands after the container is created.
 	"postCreateCommand": "sudo chown -R vscode:vscode /workspace /home/vscode",
 
+	"postStartCommand": "dotnet interactive jupyter install; jupyter notebook",
+
 	// Uncomment to connect as a non-root user. See https://aka.ms/vscode-remote/containers/non-root.
 	"remoteUser": "vscode",
 

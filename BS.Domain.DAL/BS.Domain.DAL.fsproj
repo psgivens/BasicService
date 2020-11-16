@@ -6,8 +6,10 @@
     <ProjectReference Include="..\BS.Domain\BS.Domain.fsproj" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ReadWrite.fs" />
     <Compile Include="Library.fs" />
+    <Compile Include="ReadWrite.fs" />
+    <Compile Include="EngagementEventDal.fs" />
+    <Compile Include="EventEnvelopeDal.fs" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="AWSSDK.Core" Version="3.5.1.36" />
