@@ -31,12 +31,11 @@ module EngagementEventDal =
 
     let fakeEventToAttributes (fe:FakeEvent2) = 
         match fe with
-        | Created ee -> 
-            ee 
-            |> engagementToAttributes
-            |> List.append
-                [   Attr ("Action", ScalarString "Created")
-                    Attr ("ActionVersion", ScalarString "1") ]
+        | Created ee ->             
+            engagementToAttributes ee
+            |> List.append [   
+                Attr ("Action", ScalarString "Created")
+                Attr ("ActionVersion", ScalarString "1") ]
         | _ -> failwith "FakeEvent case not supported"
 
     // Read interface
