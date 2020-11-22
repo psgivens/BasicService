@@ -1,10 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="EngagementManagement.fs" />
-    <Compile Include="Library.fs" />
+    <Compile Include="Handlers.fs" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="TaskBuilder.fs" Version="2.1.0" />

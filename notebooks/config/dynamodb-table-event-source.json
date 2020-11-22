@@ -1,0 +1,27 @@
+{
+  "TableName": "EventSourceTable",
+  "ProvisionedThroughput": {
+    "ReadCapacityUnits": 5,
+    "WriteCapacityUnits": 5
+  },
+  "AttributeDefinitions": [
+    {
+      "AttributeName": "EventId",
+      "AttributeType": "S"
+    },
+    {
+      "AttributeName": "EventVersion",
+      "AttributeType": "S"
+    }
+  ],
+  "KeySchema": [
+    {
+      "AttributeName": "EventId",
+      "KeyType": "HASH"
+    },
+    {
+      "AttributeName": "EventVersion",
+      "KeyType": "RANGE"
+    }
+  ]  
+}

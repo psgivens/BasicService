@@ -1,4 +1,5 @@
 namespace BS.Domain.DAL
+
 open Amazon.DynamoDBv2.Model
 
 open System.Collections.Generic
@@ -32,10 +33,9 @@ module EngagementEventDal =
     let fakeEventToAttributes (fe:FakeEvent2) = 
         match fe with
         | Created ee ->             
-            engagementToAttributes ee
-            |> List.append [   
-                Attr ("Action", ScalarString "Created")
-                Attr ("ActionVersion", ScalarString "1") ]
+            [ Attr ("Action", ScalarString "Created")
+              Attr ("ActionVersion", ScalarString "1") ]
+            |> List.append (engagementToAttributes ee)
         | _ -> failwith "FakeEvent case not supported"
 
     // Read interface

@@ -11,17 +11,6 @@ open System.Net
 
 module ReadWrite =
 
-    let endpointDomain = "ddb-local"
-    let endpointPort = 8000
-    let endpoint = sprintf "http://%s:%d" endpointDomain endpointPort
-
-    let tableName = "EngagementEventsTable"
-
-    printfn "  -- Setting up a DynamoDB-Local client (DynamoDB Local seems to be running)" 
-    let ddbConfig = AmazonDynamoDBConfig ( ServiceURL = endpoint )
-    let client = new AmazonDynamoDBClient(ddbConfig)
-    printfn "doing the work"
-
     type Attr =
       | Attr of name:string * AttrValue
     and  AttrValue =
@@ -61,7 +50,7 @@ module ReadWrite =
     and mapAttrsToDictionary =
       List.map mapAttr >> dict >> Dictionary<string,AttributeValue>
 
-    let putItem tableName fields : Result<Unit, string> =
+    let putItem (client:AmazonDynamoDBClient) (tableName:string) fields : Result<Unit, string> =
       PutItemRequest (tableName, mapAttrsToDictionary fields)
       |> client.PutItemAsync
       |> Async.AwaitTask
@@ -78,14 +67,14 @@ module ReadWrite =
         |> dict
         |> Dictionary<string,AttributeValue>
 
-    let response : GetItemResponse =
-        GetItemRequest (tableName, attributes)
-        |> client.GetItemAsync
-        |> Async.AwaitTask
-        |> Async.RunSynchronously
+    // let response : GetItemResponse =
+    //     GetItemRequest (tableName, attributes)
+    //     |> client.GetItemAsync
+    //     |> Async.AwaitTask
+    //     |> Async.RunSynchronously
 
-    let item : Dictionary<string,AttributeValue> =
-      response.Item
+    // let item : Dictionary<string,AttributeValue> =
+    //   response.Item
 
     type Reader<'a, 'b> = Reader of ('a -> 'b)
 
@@ -110,27 +99,42 @@ module ReadWrite =
 
       let readNested key f r = _extract (fun d -> d.[key].M) >> f |> Reader |> apply'
       let readNestedSwitch key f subkey = 
-        let getDocument = _extract (fun d -> d.[key].M)
-        let chooseNested (d:Dictionary<string,AttributeValue>) = run (f d.[subkey].S) d
-        getDocument >> chooseNested |> Reader |> apply'
 
+        // let nested = run (_extract (f d.[subkey].S) d)
+        // let getDocument = _extract (fun d -> d.[key].M)
+        // getDocument >> nested |> Reader |> apply'
+        let nestedReader (d:Dictionary<string,AttributeValue>) =
+          let readNested = d |> _extract (fun d -> d.[subkey].S) |> f |> run
+          let nestedDocument = d |> _extract (fun d -> d.[key].M)
+          readNested nestedDocument
 
+        nestedReader |> Reader |> apply'
 
-
-
-
-
-
-
-
-
-    let getItem tableName reader fields =
+    let getItem (client:AmazonDynamoDBClient) tableName reader fields =
       GetItemRequest (tableName, mapAttrsToDictionary fields)
       |> client.GetItemAsync
       |> Async.AwaitTask
       |> Async.RunSynchronously
       |> fun r -> r.Item
       |> Reader.run reader
+
+// open Amazon.DynamoDBv2
+// open Amazon.DynamoDBv2.Model
+
+    let x id = 
+      let y = 
+        QueryRequest (
+          TableName = "foo",
+          KeyConditionExpression = "EngagementEventId = :v_Id",
+          ExpressionAttributeValues = (
+             [ ":v_id", AttributeValue (S = id) ]
+             |> dict
+             |> Dictionary<string,AttributeValue>),
+          ProjectionExpression = "Subject, ReplyDateTime, PostedBy",
+          ConsistentRead = true
+        )
+      y 
+
 
     let (<!>) = Reader.map
     let (<*>) = Reader.apply

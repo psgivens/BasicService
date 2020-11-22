@@ -1,8 +1,5 @@
 module BS.Domain.EngagementManagement
 
-open FSharp.Control.Tasks.V2
-open System.Threading.Tasks
-
 type IEventSourcingEvent = interface end
 
 type CTI = {
@@ -39,15 +36,6 @@ type EngagementState = {
     Team: string  
     Cti: CTI 
 }
-
-let hanlde (state: EngagementState option) (cmd: EngagementCommand) : Task<IEventSourcingEvent list> =
-    task {
-        return 
-            match state, cmd with 
-            | None, EngagementCommand.Create details -> [ EngagementEvent.Created details ] 
-            | Some state', EngagementCommand.Update details -> [ EngagementEvent.Updated details ]
-            | _,_ -> failwith "invalid command"
-        }
 
 let evolve (state: EngagementState option) (event:EngagementEvent) =
     match state, event with
