@@ -97,18 +97,15 @@ module ReadWrite =
       let readBool   key = _extract (fun d -> d.[key].BOOL) |> Reader |> apply'
       let readNumber key f = _extract (fun d -> d.[key].N) >> f |> Reader |> apply'
 
-      let readNested key f r = _extract (fun d -> d.[key].M) >> f |> Reader |> apply'
-      let readNestedSwitch key f subkey = 
+      // let readNested key f = _extract (fun d -> d.[key].M) >> f |> Reader |> apply'
+      // let readDict key = _extract (fun d -> d.[key].M) |> Reader |> apply'
 
-        // let nested = run (_extract (f d.[subkey].S) d)
-        // let getDocument = _extract (fun d -> d.[key].M)
-        // getDocument >> nested |> Reader |> apply'
-        let nestedReader (d:Dictionary<string,AttributeValue>) =
-          let readNested = d |> _extract (fun d -> d.[subkey].S) |> f |> run
-          let nestedDocument = d |> _extract (fun d -> d.[key].M)
-          readNested nestedDocument
+      let readNested key subReader = 
+        let readNested = run subReader
+        let readDoc = _extract (fun d -> d.[key].M)
 
-        nestedReader |> Reader |> apply'
+        ((fun d' -> readDoc d' |> run (readNested d')) |> Reader |> apply')
+
 
     let getItem (client:AmazonDynamoDBClient) tableName reader fields =
       GetItemRequest (tableName, mapAttrsToDictionary fields)

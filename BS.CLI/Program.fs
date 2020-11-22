@@ -21,13 +21,13 @@ let main argv =
 
     let dao = EngagementDao(client, tableName, "sample_user")
 
-    // let id = "6e3d399a-861b-4b24-8b9b-f49d6d3dd065"
-    // let version = "1"
-    // let result = getEnvelope client tableName id version
-    // printfn "Result: %A" result
+    let id = "b982a32d-e698-4791-bc05-f9570c3c0545"
+    let version = "1"
+    let result = getEnvelope client tableName id version
+    printfn "Result: %A" result
 
-    let item = dao.MakeSampleEngagement ()
-    dao.CreateEngagement item |> ignore
+    // let item = dao.MakeSampleEngagement ()
+    // dao.CreateEngagement item |> ignore
     
     // EventEnvelopeDal.putEnvelope () |> ignore
 

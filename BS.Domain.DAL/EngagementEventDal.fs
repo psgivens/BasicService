@@ -49,12 +49,12 @@ module EngagementEventDal =
             SfdcId = sfdcId
         } |> FakeEvent2.Created :> IEventSourcingEvent     
 
-    let readEventPayload :Reader<Dictionary<string,AttributeValue>,IEventSourcingEvent> = 
+    let engagementCreatedReader :Reader<Dictionary<string,AttributeValue>,IEventSourcingEvent> = 
         Reader.withBuilder buildCreatedEvent
         |> Reader.readString "Owner"
         |> Reader.readString "ProjectName"
         |> Reader.readString "TeamsName"
         |> Reader.readString "Region"
-        |> Reader.readString "SFDCID"
+        |> Reader.readString "SfdcId"
 
 

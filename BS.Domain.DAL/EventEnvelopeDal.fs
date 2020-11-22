@@ -1,17 +1,8 @@
 namespace BS.Domain.DAL
 
-open Amazon.DynamoDBv2
-open Amazon.DynamoDBv2.DataModel
-open Amazon.DynamoDBv2.DocumentModel
-open Amazon.DynamoDBv2.Model
-
-open System.Collections.Generic
 open BS.Domain.EngagementManagement
 
 open System
-open System.IO
-open System.IO.Compression
-open System.Net
 
 open BS.Domain.DAL.EngagementEventDal
 open BS.Domain.DAL.ReadWrite
@@ -19,8 +10,6 @@ open Microsoft.FSharp.Reflection
 
 module EventEnvelopeDal =
 
-    // TODO: Add Action and ActionVersion to envelope
-    // TODO: Rewrite swtich logic to use the envelope action fields
     type Envelope = {
         Id:string
         Version:string
@@ -29,9 +18,9 @@ module EventEnvelopeDal =
         Event: IEventSourcingEvent
     }
 
-    let eventToActionName (x:'a) = 
-        match FSharpValue.GetUnionFields(x, x.GetType()) with
-        | case, _ -> case.Name
+    let eventToActionName (event:IEventSourcingEvent) = 
+        let case, _ = FSharpValue.GetUnionFields(event, event.GetType())
+        case.Name
 
     let eventToTypeName (e:IEventSourcingEvent) =
         e.GetType().Name
@@ -47,16 +36,21 @@ module EventEnvelopeDal =
           Attr ("EventVersion", ScalarString ee.Version)          
           Attr ("UserName", ScalarString ee.UserName)
           Attr ("TimeStamp", ScalarString ee.TimeStamp)
-          Attr ("Type", ScalarString (eventToActionName ee.Event))
-          Attr ("Action", ScalarString (eventToTypeName ee.Event))
+          Attr ("Type", ScalarString (eventToTypeName ee.Event))
+          Attr ("Action", ScalarString (eventToActionName ee.Event))
           Attr ("Event", DocMap (eventPayloadToAttributes ee.Event)) ]
 
 
     // Read interfaces
-    let readPayloadSwtich action =      
-        match action with  
-        | "Create" -> readEventPayload
-        | _ -> failwith "Unsupported action"             
+    let chooseEventReader ``type`` action =
+        match ``type``, action with  
+        | "FakeEvent2", "Created" -> engagementCreatedReader
+        | _, _ -> failwith "Unsupported action"             
+
+    let getEventReader =  //:Reader<Dictionary<string,AttributeValue>,Reader<Dictionary<string,AttributeValue>,IEventSourcingEvent>> = 
+        (Reader.withBuilder chooseEventReader
+        |> Reader.readString "Type"
+        |> Reader.readString "Action") 
 
     let buildEnvelope id version userName timeStamp event = 
         {
@@ -66,15 +60,14 @@ module EventEnvelopeDal =
             TimeStamp = timeStamp
             Event = event
         }
-
+       
     let readEnvelope =
         Reader.withBuilder buildEnvelope
         |> Reader.readString "EventId"
         |> Reader.readString "EventVersion"
         |> Reader.readString "UserName"
         |> Reader.readString "TimeStamp"
-        |> Reader.readNestedSwitch "Event" readPayloadSwtich "Action"
-
+        |> Reader.readNested "Event" getEventReader
 
     let getEnvelope client tableName id version : Envelope =
       getItem 
