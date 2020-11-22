@@ -18,6 +18,11 @@ module EventEnvelopeDal =
         Event: IEventSourcingEvent
     }
 
+
+    (***************************** 
+     * Writing event envelopes 
+     *****************************)
+
     let eventToActionName (event:IEventSourcingEvent) = 
         let case, _ = FSharpValue.GetUnionFields(event, event.GetType())
         case.Name
@@ -41,7 +46,10 @@ module EventEnvelopeDal =
           Attr ("Event", DocMap (eventPayloadToAttributes ee.Event)) ]
 
 
-    // Read interfaces
+    (***************************** 
+     * Reading event envelopes 
+     *****************************)
+
     let chooseEventReader ``type`` action =
         match ``type``, action with  
         | "FakeEvent2", "Created" -> engagementCreatedReader
@@ -68,6 +76,10 @@ module EventEnvelopeDal =
         |> Reader.readString "UserName"
         |> Reader.readString "TimeStamp"
         |> Reader.readNested "Event" getEventReader
+
+    (***************************** 
+     * Using event envelopes 
+     *****************************)
 
     let getEnvelope client tableName id version : Envelope =
       getItem 
