@@ -4,7 +4,7 @@ open Amazon.DynamoDBv2.Model
 
 open System.Collections.Generic
 open BS.Domain.EngagementManagement
-open BS.Domain.DAL.ReadWrite
+open BS.Domain.DAL.DataAccess
 
 module EngagementEventDal =
 
@@ -20,22 +20,26 @@ module EngagementEventDal =
         | Created of EngagementDetails2
         interface IEventSourcingEvent
 
+    let appendOpt item list =
+        match item with
+        | None -> list
+        | Some(value) -> value
 
     // Write interface
     let engagementToAttributes (ee:EngagementDetails2)=
-        [ Attr ("Owner", ScalarString ee.Owner)
-          Attr ("ProjectName", ScalarString ee.ProjectName)
-          Attr ("Region", ScalarString ee.Region)
-          Attr ("SfdcId", ScalarString ee.SfdcId)
-          Attr ("TeamsName", ScalarString ee.TeamsName)
-        ]
+        [ ("Owner", ScalarString ee.Owner)
+          ("ProjectName", ScalarString ee.ProjectName)
+          ("Region", ScalarString ee.Region)
+          ("SfdcId", ScalarString ee.SfdcId)
+          ("TeamsName", ScalarString ee.TeamsName) ]
 
     let fakeEventToAttributes (fe:FakeEvent2) = 
         match fe with
-        | Created ee ->             
-            [ Attr ("Action", ScalarString "Created")
-              Attr ("ActionVersion", ScalarString "1") ]
-            |> List.append (engagementToAttributes ee)
+        | Created ee ->     
+            engagementToAttributes ee        
+            // [ ("Action", ScalarString "Created")
+            //   ("ActionVersion", ScalarString "1") ]
+            // |> List.append (engagementToAttributes ee)
         | _ -> failwith "FakeEvent case not supported"
 
     // Read interface
@@ -49,12 +53,26 @@ module EngagementEventDal =
             SfdcId = sfdcId
         } |> FakeEvent2.Created :> IEventSourcingEvent     
 
-    let engagementCreatedReader :Reader<Dictionary<string,AttributeValue>,IEventSourcingEvent> = 
+    let engagementCreatedReader :EventSourceReader = 
         Reader.withBuilder buildCreatedEvent
         |> Reader.readString "Owner"
         |> Reader.readString "ProjectName"
         |> Reader.readString "TeamsName"
         |> Reader.readString "Region"
         |> Reader.readString "SfdcId"
+
+
+    type EngagementEventConverter () = 
+        interface IEventConverter with
+            member _.GetReader (``type``:string) (action:string) : EventSourceReader option =
+                match ``type``, action with
+                | "FakeEvent2", "Created" -> Some engagementCreatedReader
+                | _ -> None
+            member _.GetAttributes (event:IEventSourcingEvent) : list<Attr> option =
+                match event with 
+                | :? FakeEvent2 as fe -> fakeEventToAttributes fe |> Some
+                | _ -> None
+
+
 
 

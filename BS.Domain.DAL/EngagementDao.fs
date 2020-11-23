@@ -13,12 +13,12 @@ open System.IO
 open System.IO.Compression
 open System.Net
 
-open BS.Domain.DAL.ReadWrite
+open BS.Domain.DAL.DataAccess
 open BS.Domain.DAL.EngagementEventDal
 open BS.Domain.DAL.EventEnvelopeDal
 
-type EngagementDao (client:AmazonDynamoDBClient, tableName:string, userName:string) =
-    let envelop' = envelop userName
+type EngagementDao (envDao:EventEnvelopeDao) =
+
     member dao.MakeSampleEngagement () = 
         {
             EngagementDetails2.Owner = "Fun Guy"
@@ -30,17 +30,15 @@ type EngagementDao (client:AmazonDynamoDBClient, tableName:string, userName:stri
 
     member dao.CreateEngagement (engagement:EngagementDetails2) = 
         FakeEvent2.Created engagement 
-        |> envelop' ((System.Guid.NewGuid ()).ToString()) "1" 
-        |> insertEventEnvelope client tableName
+        |> envDao.Envelop ((System.Guid.NewGuid ()).ToString()) "1" 
+        |> envDao.InsertEventEnvelope 
 
-        // TODO Store a copy of the engagement
 
     member dao.UpdateEngagement id version (engagement:EngagementDetails2) = 
         let events = getItem
 
         FakeEvent2.Created engagement 
-        |> envelop' ((System.Guid.NewGuid ()).ToString()) "1" 
-        |> insertEventEnvelope client tableName
+        |> envDao.Envelop ((System.Guid.NewGuid ()).ToString()) "1" 
+        |> envDao.InsertEventEnvelope 
 
-        // TODO Store a copy of the engagement
 

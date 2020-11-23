@@ -4,6 +4,7 @@ open System
 open BS.Domain.DAL
 open Amazon.DynamoDBv2
 open BS.Domain.DAL.EventEnvelopeDal
+open BS.Domain.DAL.EngagementEventDal
 
 let endpointDomain = "ddb-local"
 let endpointPort = 8000
@@ -19,13 +20,14 @@ printfn "doing the work"
 let main argv =
     use client = new AmazonDynamoDBClient(ddbConfig)
 
-    let dao = EngagementDao(client, tableName, "sample_user")
+    let envDao = EventEnvelopeDao ([EngagementEventConverter ()], client, tableName, "sample_user")
 
     let id = "b982a32d-e698-4791-bc05-f9570c3c0545"
     let version = "1"
-    let result = getEnvelope client tableName id version
+    let result = envDao.GetEnvelope id version
     printfn "Result: %A" result
 
+    // let dao = EngagementDao envDao
     // let item = dao.MakeSampleEngagement ()
     // dao.CreateEngagement item |> ignore
     
