@@ -9,10 +9,10 @@ type CTI = {
 }
 
 type EngagementDetails = {
-    CustomerName: string option
-    ProjectName: string option
-    SfdcProjectId: string option
-    SfdcProjectSlug: string option
+    CustomerName: string
+    ProjectName: string
+    SfdcProjectId: string
+    SfdcProjectSlug: string
     SecurityOwner: string option
     Team: string option    
     Cti: CTI option
@@ -40,19 +40,19 @@ type EngagementState = {
 let evolve (state: EngagementState option) (event:EngagementEvent) =
     match state, event with
     | None, EngagementEvent.Created details -> {
-            EngagementState.CustomerName = details.CustomerName |> Option.defaultValue "not supplied"
-            ProjectName = details.ProjectName |> Option.defaultValue "not supplied"
-            SfdcProjectId = details.SfdcProjectId |> Option.defaultValue ""
-            SfdcProjectSlug = details.SfdcProjectSlug |> Option.defaultValue ""
+            EngagementState.CustomerName = details.CustomerName 
+            ProjectName = details.ProjectName 
+            SfdcProjectId = details.SfdcProjectId 
+            SfdcProjectSlug = details.SfdcProjectSlug 
             SecurityOwner = details.SecurityOwner |> Option.defaultValue ""
             Team = details.Team |> Option.defaultValue ""
             Cti = details.Cti |> Option.defaultValue { CTI.Category=""; Type=""; Item="" }
         }
     | Some state', EngagementEvent.Updated details -> {
-            EngagementState.CustomerName = details.CustomerName |> Option.defaultValue state'.CustomerName
-            ProjectName = details.ProjectName |> Option.defaultValue state'.ProjectName
-            SfdcProjectId = details.SfdcProjectId |> Option.defaultValue state'.SfdcProjectId
-            SfdcProjectSlug = details.SfdcProjectSlug |> Option.defaultValue state'.SfdcProjectSlug
+            EngagementState.CustomerName = details.CustomerName 
+            ProjectName = details.ProjectName 
+            SfdcProjectId = details.SfdcProjectId 
+            SfdcProjectSlug = details.SfdcProjectSlug 
             SecurityOwner = details.SecurityOwner |> Option.defaultValue state'.SecurityOwner
             Team = details.Team |> Option.defaultValue state'.Team
             Cti = details.Cti |> Option.defaultValue state'.Cti

@@ -22,7 +22,7 @@ let main argv =
 
     let envDao = EventEnvelopeDao ([EngagementEventConverter ()], client, tableName, "sample_user")
 
-    let id = "b982a32d-e698-4791-bc05-f9570c3c0545"
+    let id = "c292cd6c-4d32-461d-bff9-7b5f3bfae82b"
     let version = "1"
     let result = envDao.GetEnvelope id version
     printfn "Result: %A" result

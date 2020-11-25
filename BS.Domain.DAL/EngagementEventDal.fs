@@ -2,38 +2,58 @@ namespace BS.Domain.DAL
 
 open Amazon.DynamoDBv2.Model
 
+open BS.Domain.EngagementManagement
 open System.Collections.Generic
 open BS.Domain.EngagementManagement
 open BS.Domain.DAL.DataAccess
 
 module EngagementEventDal =
 
-    type EngagementDetails2 = {
-        TeamsName: string
-        Region: string
-        SfdcId: string
-        Owner: string
-        ProjectName: string
-    }
+    // type EngagementDetails2 = {
+    //     TeamsName: string
+    //     Region: string
+    //     SfdcId: string
+    //     Owner: string
+    //     ProjectName: string
+    // }
 
-    type FakeEvent2 =
-        | Created of EngagementDetails2
-        interface IEventSourcingEvent
+    // type FakeEvent2 =
+    //     | Created of EngagementDetails2
+    //     interface IEventSourcingEvent
 
     let appendOpt item list =
         match item with
         | None -> list
         | Some(value) -> value
 
-    // Write interface
-    let engagementToAttributes (ee:EngagementDetails2)=
-        [ ("Owner", ScalarString ee.Owner)
-          ("ProjectName", ScalarString ee.ProjectName)
-          ("Region", ScalarString ee.Region)
-          ("SfdcId", ScalarString ee.SfdcId)
-          ("TeamsName", ScalarString ee.TeamsName) ]
 
-    let fakeEventToAttributes (fe:FakeEvent2) = 
+// type EngagementDetails = {
+//     CustomerName: string option
+//     ProjectName: string option
+//     SfdcProjectId: string option
+//     SfdcProjectSlug: string option
+//     SecurityOwner: string option
+//     Team: string option    
+//     Cti: CTI option
+// }
+
+    // Write interface
+
+    let ctiToAttributes (cti:CTI) = 
+        [   ("Category", ScalarString cti.Category)
+            ("Type", ScalarString cti.Type)
+            ("Item", ScalarString cti.Item) ]
+
+    let engagementToAttributes (ee:EngagementDetails) =
+        [ ("CustomerName", ScalarString ee.CustomerName)
+          ("ProjectName", ScalarString ee.ProjectName)
+          ("SfdcProjectId", ScalarString ee.SfdcProjectId)
+          ("SfdcProjectSlug", ScalarString ee.SfdcProjectSlug)
+          ("SecurityOwner", ScalarStringOpt ee.SecurityOwner)
+          ("Team", ScalarStringOpt ee.Team)
+          ("CTI", DocMapOpt <| Option.map ctiToAttributes ee.Cti) ]         
+
+    let fakeEventToAttributes (fe:EngagementEvent) = 
         match fe with
         | Created ee ->     
             engagementToAttributes ee        
@@ -44,33 +64,55 @@ module EngagementEventDal =
 
     // Read interface
 
-    let buildCreatedEvent owner projectName teamsName region sfdcId :IEventSourcingEvent =
+    let buildCti category ``type`` item =
+        { CTI.Category = category
+          Type = ``type``
+          Item = item}
+
+    let readCti _ = 
+        Reader.withBuilder buildCti
+        |> Reader.readString "Category"
+        |> Reader.readString "Type"
+        |> Reader.readString "Item"
+
+    let buildCreatedEvent 
+            customerName
+            projectName
+            sfdcId
+            sfdcProjectSlug
+            securityOwner
+            team
+            cti :IEventSourcingEvent =
         { 
-            EngagementDetails2.Owner = owner
+            EngagementDetails.CustomerName = customerName
             ProjectName = projectName
-            TeamsName = teamsName
-            Region = region
-            SfdcId = sfdcId
-        } |> FakeEvent2.Created :> IEventSourcingEvent     
+            SfdcProjectId = sfdcId
+            SfdcProjectSlug = sfdcProjectSlug
+            SecurityOwner = securityOwner
+            Team = team
+            Cti = cti
+        } |> EngagementEvent.Created :> IEventSourcingEvent     
 
     let engagementCreatedReader :EventSourceReader = 
         Reader.withBuilder buildCreatedEvent
-        |> Reader.readString "Owner"
+        |> Reader.readString "CustomerName"
         |> Reader.readString "ProjectName"
-        |> Reader.readString "TeamsName"
-        |> Reader.readString "Region"
-        |> Reader.readString "SfdcId"
+        |> Reader.readString "SfdcProjectId"
+        |> Reader.readString "SfdcProjectSlug"
+        |> Reader.readStringOpt "SecurityOwner"
+        |> Reader.readStringOpt "Team"
+        |> Reader.readNestedOpt "CTI" readCti
 
 
     type EngagementEventConverter () = 
         interface IEventConverter with
             member _.GetReader (``type``:string) (action:string) : EventSourceReader option =
                 match ``type``, action with
-                | "FakeEvent2", "Created" -> Some engagementCreatedReader
+                | "BS.Domain.EngagementManagement+EngagementEvent+Created", "Created" -> Some engagementCreatedReader
                 | _ -> None
             member _.GetAttributes (event:IEventSourcingEvent) : list<Attr> option =
                 match event with 
-                | :? FakeEvent2 as fe -> fakeEventToAttributes fe |> Some
+                | :? EngagementEvent as fe -> fakeEventToAttributes fe |> Some
                 | _ -> None
 
 

@@ -26,6 +26,7 @@ module DataAccess =
       | SetBinary of string Set
       | DocList of AttrValue list
       | DocMap of Attr list
+      | DocMapOpt of Attr list option
 
     type Attributes = Dictionary<string,AttributeValue>
 
@@ -50,6 +51,7 @@ module DataAccess =
       | ScalarStringOpt s  -> AttributeValue (S = Option.get s )
       | ScalarDecimalOpt n -> AttributeValue (N = string (Option.get n) )
       | ScalarBoolOpt b    -> AttributeValue (BOOL = Option.get b)
+      | DocMapOpt m        -> AttributeValue (M = mapAttrsToDictionary (Option.get m))
 
     and mapAttr (name, value) =
       name, mapAttrValue value
@@ -69,23 +71,42 @@ module DataAccess =
       let apply r r' = Reader (fun a -> run r a |> run r' a) // Reader applicative function
       let withBuilder f = Reader (fun _ -> f)
 
-      let _extract f (d:Attributes) = f d
+      let _extract key f (d:Attributes) = f (d.[key])
       let _extractOpt key (f:AttributeValue -> 'a) (d:Attributes) = 
         match d.TryGetValue key with
-        | true, value -> Some ValueNone
+        | true, value -> Some (f value)
         | _, _ -> None
 
-      let readString key = _extract (fun d -> d.[key].S) |> Reader |> apply
-      let readBool   key = _extract (fun d -> d.[key].BOOL) |> Reader |> apply
-      let readNumber key f = _extract (fun d -> d.[key].N) >> f |> Reader |> apply
+      let readString key = _extract key (fun attr -> attr.S) |> Reader |> apply
+      let readBool   key = _extract key (fun attr -> attr.BOOL) |> Reader |> apply
+      let readNumber key f = _extract key (fun attr -> attr.N) >> f |> Reader |> apply
       let readStringOpt key = _extractOpt key (fun attr -> attr.S) |> Reader |> apply
       let readBoolOpt   key = _extractOpt key (fun attr -> attr.BOOL) |> Reader |> apply
       let readNumberOpt key f = _extractOpt key (fun attr -> attr.N) >> f |> Reader |> apply
 
-      let readNested key subReader = 
+      // Working
+      let selectNestedReader key subReader = 
         let readNested = run subReader
-        let readDoc = _extract (fun d -> d.[key].M)
+        let readDoc = _extract key (fun attr -> attr.M)
         ((fun d' -> readDoc d' |> run (readNested d')) |> Reader |> apply)
+
+      // May not work. I've never tried
+      let selectNestedReaderOpt key subReader = 
+        let readNested = run subReader
+        let readDoc = _extractOpt key (fun attr -> attr.M)
+        ((fun d' -> readDoc d' |> Option.map (run (readNested d'))) |> Reader |> apply)
+
+      // may not owrk. I've never tried.
+      let readNested key subReader = 
+        let readNested = subReader
+        let readDoc = _extract key (fun attr -> attr.M)
+        ((fun d' -> readDoc d' |> run (subReader d')) |> Reader |> apply)
+
+      // Working
+      let readNestedOpt key subReader = 
+        let readNested = subReader
+        let readDoc = _extractOpt key (fun attr -> attr.M)
+        ((fun d' -> readDoc d' |> Option.map (run (subReader d'))) |> Reader |> apply)
 
     let putItem (client:AmazonDynamoDBClient) (tableName:string) fields : Result<Unit, string> =
       PutItemRequest (tableName, mapAttrsToDictionary fields)

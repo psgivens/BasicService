@@ -14,30 +14,36 @@ open System.IO.Compression
 open System.Net
 
 open BS.Domain.DAL.DataAccess
-open BS.Domain.DAL.EngagementEventDal
+open BS.Domain.EngagementManagement
 open BS.Domain.DAL.EventEnvelopeDal
 
 type EngagementDao (envDao:EventEnvelopeDao) =
 
     member dao.MakeSampleEngagement () = 
         {
-            EngagementDetails2.Owner = "Fun Guy"
+            EngagementDetails.CustomerName = "Big Good Corporation"
             ProjectName = "A major project"
-            TeamsName = "flytrap and co"
-            Region = "NARNIA"
-            SfdcId = "PROJ-1234"
+            SfdcProjectId = "PROJ-1234"
+            SfdcProjectSlug = "abc10324kjlaskdfjhv"
+            SecurityOwner = "Spider man" |> Some
+            Team = "Justice league" |> Some
+            Cti = {
+                Category = "AWS"
+                Type = "ProServe"
+                Item = "EngSec"
+            } |> Some
         }
 
-    member dao.CreateEngagement (engagement:EngagementDetails2) = 
-        FakeEvent2.Created engagement 
+    member dao.CreateEngagement (engagement:EngagementDetails) = 
+        Created engagement 
         |> envDao.Envelop ((System.Guid.NewGuid ()).ToString()) "1" 
         |> envDao.InsertEventEnvelope 
 
 
-    member dao.UpdateEngagement id version (engagement:EngagementDetails2) = 
+    member dao.UpdateEngagement id version (engagement:EngagementDetails) = 
         let events = getItem
 
-        FakeEvent2.Created engagement 
+        Created engagement 
         |> envDao.Envelop ((System.Guid.NewGuid ()).ToString()) "1" 
         |> envDao.InsertEventEnvelope 
 

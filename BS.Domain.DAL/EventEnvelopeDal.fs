@@ -33,7 +33,7 @@ module EventEnvelopeDal =
             case.Name
 
         let eventToTypeName (e:IEventSourcingEvent) =
-            e.GetType().Name
+            e.GetType().FullName
 
         let rec executeOrFail (f:'a -> 'b option) (error:string) (matchers':'a list) = 
             let executeOrFail' = executeOrFail f error
@@ -87,7 +87,7 @@ module EventEnvelopeDal =
             |> Reader.readString "EventVersion"
             |> Reader.readString "UserName"
             |> Reader.readString "TimeStamp"
-            |> Reader.readNested "Event" getEventReader
+            |> Reader.selectNestedReader "Event" getEventReader
 
         (***************************** 
          * Using event envelopes 
