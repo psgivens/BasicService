@@ -21,7 +21,6 @@ module EventEnvelopeDal =
         Event: IEventSourcingEvent
     }
 
-
     type EventEnvelopeDao (matchers:IEventConverter list, client:AmazonDynamoDBClient, tableName:string, userName:string) =
 
         (***************************** 

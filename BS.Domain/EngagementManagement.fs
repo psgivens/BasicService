@@ -8,7 +8,7 @@ type CTI = {
     Item: string
 }
 
-type EngagementDetails = {
+type EngagementCreatedDetails = {
     CustomerName: string
     ProjectName: string
     SfdcProjectId: string
@@ -18,13 +18,23 @@ type EngagementDetails = {
     Cti: CTI option
 }
 
+type EngagementUpdatedDetails = {
+    CustomerName: string option
+    ProjectName: string option
+    SfdcProjectId: string option
+    SfdcProjectSlug: string option
+    SecurityOwner: string option
+    Team: string option    
+    Cti: CTI option
+}
+
 type EngagementCommand =
-    | Create of EngagementDetails
-    | Update of EngagementDetails
+    | Create of EngagementCreatedDetails
+    | Update of EngagementUpdatedDetails
 
 type EngagementEvent =
-    | Created of EngagementDetails
-    | Updated of EngagementDetails
+    | Created of EngagementCreatedDetails
+    | Updated of EngagementUpdatedDetails
     interface IEventSourcingEvent
 
 type EngagementState = {
@@ -39,22 +49,24 @@ type EngagementState = {
 
 let evolve (state: EngagementState option) (event:EngagementEvent) =
     match state, event with
-    | None, EngagementEvent.Created details -> {
-            EngagementState.CustomerName = details.CustomerName 
-            ProjectName = details.ProjectName 
-            SfdcProjectId = details.SfdcProjectId 
-            SfdcProjectSlug = details.SfdcProjectSlug 
-            SecurityOwner = details.SecurityOwner |> Option.defaultValue ""
-            Team = details.Team |> Option.defaultValue ""
-            Cti = details.Cti |> Option.defaultValue { CTI.Category=""; Type=""; Item="" }
+    | None, Created details -> {
+            EngagementState.CustomerName    = details.CustomerName 
+            ProjectName                     = details.ProjectName 
+            SfdcProjectId                   = details.SfdcProjectId 
+            SfdcProjectSlug                 = details.SfdcProjectSlug 
+            SecurityOwner                   = details.SecurityOwner |> Option.defaultValue ""
+            Team                            = details.Team |> Option.defaultValue ""
+            Cti                             = details.Cti |> Option.defaultValue { CTI.Category=""; Type=""; Item="" }
         }
-    | Some state', EngagementEvent.Updated details -> {
-            EngagementState.CustomerName = details.CustomerName 
-            ProjectName = details.ProjectName 
-            SfdcProjectId = details.SfdcProjectId 
-            SfdcProjectSlug = details.SfdcProjectSlug 
-            SecurityOwner = details.SecurityOwner |> Option.defaultValue state'.SecurityOwner
-            Team = details.Team |> Option.defaultValue state'.Team
-            Cti = details.Cti |> Option.defaultValue state'.Cti
-        }    
+    | Some s, Updated d -> 
+        let (|?) o1 dv = o1 |> Option.defaultValue dv
+        {
+            EngagementState.CustomerName    = d.CustomerName |? s.CustomerName 
+            ProjectName                     = d.ProjectName |? s.ProjectName
+            SfdcProjectId                   = d.SfdcProjectId |? s.SfdcProjectId
+            SfdcProjectSlug                 = d.SfdcProjectSlug |? s.SfdcProjectSlug
+            SecurityOwner                   = d.SecurityOwner |? s.SecurityOwner
+            Team                            = d.Team |? s.Team
+            Cti                             = d.Cti |? s.Cti
+        }
     | _,_ -> failwith "invalid event"

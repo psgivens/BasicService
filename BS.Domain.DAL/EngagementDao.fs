@@ -17,11 +17,13 @@ open BS.Domain.DAL.DataAccess
 open BS.Domain.EngagementManagement
 open BS.Domain.DAL.EventEnvelopeDal
 
+type CreateEngagementRequest = EngagementCreatedDetails
+
 type EngagementDao (envDao:EventEnvelopeDao) =
 
     member dao.MakeSampleEngagement () = 
         {
-            EngagementDetails.CustomerName = "Big Good Corporation"
+            EngagementCreatedDetails.CustomerName = "Big Good Corporation"
             ProjectName = "A major project"
             SfdcProjectId = "PROJ-1234"
             SfdcProjectSlug = "abc10324kjlaskdfjhv"
@@ -34,13 +36,13 @@ type EngagementDao (envDao:EventEnvelopeDao) =
             } |> Some
         }
 
-    member dao.CreateEngagement (engagement:EngagementDetails) = 
+    member dao.CreateEngagement (engagement:CreateEngagementRequest) = 
         Created engagement 
         |> envDao.Envelop ((System.Guid.NewGuid ()).ToString()) "1" 
         |> envDao.InsertEventEnvelope 
 
 
-    member dao.UpdateEngagement id version (engagement:EngagementDetails) = 
+    member dao.UpdateEngagement id version (engagement:EngagementCreatedDetails) = 
         let events = getItem
 
         Created engagement 

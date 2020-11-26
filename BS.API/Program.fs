@@ -13,6 +13,24 @@ open Giraffe
 open Microsoft.AspNetCore.Http
 open FSharp.Control.Tasks.V2.ContextSensitive
 
+open BS.API
+open BS.API.Controllers
+
+open Amazon.DynamoDBv2
+
+
+let endpointDomain = "ddb-local"
+let endpointPort = 8000
+let endpoint = sprintf "http://%s:%d" endpointDomain endpointPort
+
+let tableName = "EventSourceTable"
+
+printfn "  -- Setting up a DynamoDB-Local client (DynamoDB Local seems to be running)" 
+let ddbConfig = AmazonDynamoDBConfig ( ServiceURL = endpoint )
+printfn "doing the work"
+
+
+
 // ---------------------------------
 // Models
 // ---------------------------------
@@ -80,7 +98,11 @@ let indexHandler (name : string) =
     htmlView view
 
 let webApp =
+    let createClient () = new AmazonDynamoDBClient(ddbConfig)
+    let controller = EngagementController (createClient, tableName)
     choose [
+        route "/engagements" >=>
+            POST >=> controller.SubmitEngagement 
         GET >=>
             choose [
                 route "/" >=> indexHandler "world"
