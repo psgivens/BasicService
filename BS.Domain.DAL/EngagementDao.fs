@@ -21,10 +21,6 @@ type CreateEngagementRequest = EngagementCreatedDetails
 
 type EngagementDao (envDao:EventEnvelopeDao) =
 
-    let buildQueryEngagement id = 
-        let events = envDao.GetEnvelope
-        ()
-
     member dao.MakeSampleEngagement () = 
         {
             EngagementCreatedDetails.CustomerName = "Big Good Corporation"
