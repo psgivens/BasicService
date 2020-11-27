@@ -21,7 +21,8 @@ module EventEnvelopeDal =
         Event: IEventSourcingEvent
     }
 
-    type EventEnvelopeDao (matchers:IEventConverter list, client:AmazonDynamoDBClient, tableName:string, userName:string) =
+    type EventEnvelopeDao (eventConverters:IEventConverter list, client:AmazonDynamoDBClient, userName:string) =
+        let tableName = "EventSourceTable"
 
         (***************************** 
          * Writing event envelopes 
@@ -34,19 +35,20 @@ module EventEnvelopeDal =
         let eventToTypeName (e:IEventSourcingEvent) =
             e.GetType().FullName
 
-        let rec executeOrFail (f:'a -> 'b option) (error:string) (matchers':'a list) = 
-            let executeOrFail' = executeOrFail f error
-            match matchers' with 
-            | matcher :: tail -> 
-                match f matcher with
+        let executeOrFail (f:'a -> 'b option) (error:string) (eventConverters:'a list) = 
+            let rec executeOrFail' = function            
+            | eventConverter :: tail -> 
+                match f eventConverter with
                 | None -> executeOrFail' tail 
                 | Some(attrs) -> attrs
             | [] -> failwith error
 
+            executeOrFail' eventConverters
+
         // Write interface
         let eventPayloadToAttributes (e:IEventSourcingEvent) = 
             let getAttributes (m:IEventConverter) = m.GetAttributes e
-            matchers |> executeOrFail getAttributes "Converter not found"
+            eventConverters |> executeOrFail getAttributes "Converter not found"
 
         let eventToAttributes (ee:Envelope)=
             [ ("EventId", ScalarString ee.Id)
@@ -64,7 +66,7 @@ module EventEnvelopeDal =
 
         let chooseEventReader ``type`` action =
             let getReader (m:IEventConverter) = m.GetReader ``type`` action
-            matchers |> executeOrFail getReader "Converter not found"
+            eventConverters |> executeOrFail getReader "Converter not found"
 
         let getEventReader = 
             (Reader.withBuilder chooseEventReader

@@ -23,8 +23,6 @@ let endpointDomain = "ddb-local"
 let endpointPort = 8000
 let endpoint = sprintf "http://%s:%d" endpointDomain endpointPort
 
-let tableName = "EventSourceTable"
-
 printfn "  -- Setting up a DynamoDB-Local client (DynamoDB Local seems to be running)" 
 let ddbConfig = AmazonDynamoDBConfig ( ServiceURL = endpoint )
 printfn "doing the work"
@@ -99,7 +97,7 @@ let indexHandler (name : string) =
 
 let webApp =
     let createClient () = new AmazonDynamoDBClient(ddbConfig)
-    let controller = EngagementController (createClient, tableName)
+    let controller = EngagementController (createClient)
     choose [
         route "/engagements" >=>
             POST >=> controller.SubmitEngagement 

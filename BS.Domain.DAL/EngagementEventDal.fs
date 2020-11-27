@@ -5,6 +5,11 @@ open BS.Domain.DAL.DataAccess
 
 module EngagementEventDal =
 
+    let ctiToAttributes (cti:CTI) = 
+        [   ("Category", ScalarString cti.Category)
+            ("Type", ScalarString cti.Type)
+            ("Item", ScalarString cti.Item) ]
+            
     type EngagementEventConverter () = 
 
         (**************************

@@ -6,22 +6,37 @@ open Amazon.DynamoDBv2.DocumentModel
 open Amazon.DynamoDBv2.Model
 
 open System.Collections.Generic
-open BS.Domain.EngagementManagement
 
 open System
 open System.IO
 open System.IO.Compression
 open System.Net
 
-open BS.Domain.DAL.DataAccess
+open BS.Domain
 open BS.Domain.EngagementManagement
+open BS.Domain.DAL.DataAccess
 open BS.Domain.DAL.EventEnvelopeDal
+open BS.Domain.DAL.EngagementEventDal
 
 type CreateEngagementRequest = EngagementCreatedDetails
 
-type EngagementDao (envDao:EventEnvelopeDao) =
+type EngagementDao (envDao:EventEnvelopeDao, client:AmazonDynamoDBClient) =
+    let engagementsTable = "EngagementsTable"
 
-    member dao.MakeSampleEngagement () = 
+    let engagementToAttributes id (e:EngagementState)=
+        [ ("EngagementId", ScalarString id)
+          ("TeamsName", ScalarString e.Team)
+          ("Segment", ScalarString "fict")
+          ("SFDCID", ScalarString e.SfdcProjectId)
+          ("ProjectManager", ScalarString e.SecurityOwner) 
+          ("CustomerName", ScalarString e.CustomerName)
+          ("SfdcProjectId", ScalarString e.SfdcProjectId)
+          ("SfdcProjectSlug", ScalarString e.SfdcProjectSlug)
+          ("SecurityOwner", ScalarString e.SecurityOwner)
+          ("CTI", DocMap <| ctiToAttributes e.Cti) 
+          ("TimeStamp", ScalarString (DateTime.Now.ToString ()))]
+
+    member _.MakeSampleEngagement () = 
         {
             EngagementCreatedDetails.CustomerName = "Big Good Corporation"
             ProjectName = "A major project"
@@ -36,8 +51,8 @@ type EngagementDao (envDao:EventEnvelopeDao) =
             } |> Some
         }
 
-    member dao.CreateEngagement (engagement:CreateEngagementRequest) = 
-        let id = ((System.Guid.NewGuid ()).ToString())
+    member _.CreateEngagement (engagement:CreateEngagementRequest) = 
+        let id = ((Guid.NewGuid ()).ToString())
         Created engagement 
         |> envDao.Envelop id "1" 
         |> envDao.InsertEventEnvelope 
@@ -47,10 +62,12 @@ type EngagementDao (envDao:EventEnvelopeDao) =
            | Error message -> failwith message
         |> envDao.GetEnvelopes 
         |> List.map (fun env -> env.Event :?> EngagementEvent)
-        |> List.fold evolve None
-        // TODO: Put the item into the Enagagement table
+        |> List.fold evolve None        
+        |> Option.get
+        |> engagementToAttributes id
+        |> putItem client engagementsTable 
 
-    member dao.UpdateEngagement id version (engagement:EngagementCreatedDetails) = 
+    member _.UpdateEngagement id version (engagement:EngagementCreatedDetails) = 
         let events = getItem
 
         Created engagement 

@@ -34,7 +34,7 @@ type EngagementDto = {
     }
 
 
-type EngagementController (createClient:unit -> AmazonDynamoDBClient, tableName: string) = 
+type EngagementController (createClient:unit -> AmazonDynamoDBClient) = 
     let client = createClient ()
     member _.SubmitEngagement : HttpHandler =
         fun (next : HttpFunc) (ctx : HttpContext) ->
@@ -42,16 +42,16 @@ type EngagementController (createClient:unit -> AmazonDynamoDBClient, tableName:
                 // Binds a JSON payload to a Car object
                 let! dto = ctx.BindJsonAsync<EngagementDto>()
 
-                let envDao = EventEnvelopeDao ([EngagementEventConverter ()], client, tableName, "sample_user")
+                let envDao = EventEnvelopeDao ([EngagementEventConverter ()], client, "sample_user")
 
-                let dao = EngagementDao envDao
+                let dao = EngagementDao (envDao, client)
                 
                 let optString = function
                     | s when System.String.IsNullOrWhiteSpace(s) -> None
                     | value -> Some value
 
                 let (|?!) (value:string) (name:string) = 
-                    optString value |> Option.defaultWith (invalidArg name "String cannot be empty")
+                    optString value |> Option.defaultWith (fun () -> invalidArg name "String cannot be empty")
 
                 let optCti cti =
                     let { CtiDto.Category=c; Type=t; Item=i } = cti
@@ -66,7 +66,7 @@ type EngagementController (createClient:unit -> AmazonDynamoDBClient, tableName:
 
                 try
                     // let item = dao.MakeSampleEngagement ()
-                    let id =dao.CreateEngagement {
+                    let id = dao.CreateEngagement {
                         CreateEngagementRequest.CustomerName =  dto.CustomerName |?! "CustomerName"
                         ProjectName = dto.ProjectName |?! "ProjectName"
                         SfdcProjectId = dto.SfdcProjectId |?! "SfdcProjectId"

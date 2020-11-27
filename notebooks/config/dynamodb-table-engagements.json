@@ -1,16 +1,16 @@
 {
-  "TableName": "EngagementEventsTable",
+  "TableName": "EngagementsTable",
   "ProvisionedThroughput": {
     "ReadCapacityUnits": 5,
     "WriteCapacityUnits": 5
   },
   "AttributeDefinitions": [
     {
-      "AttributeName": "EngagementEventId",
+      "AttributeName": "EngagementId",
       "AttributeType": "S"
     },
     {
-      "AttributeName": "TeamsName'",
+      "AttributeName": "TeamsName",
       "AttributeType": "S"    
     },
     {
@@ -22,18 +22,14 @@
       "AttributeType": "S"
     },
     {
-      "AttributeName": "ProjectManagerAlias",
+      "AttributeName": "ProjectManager",
       "AttributeType": "S"
     }
   ],
   "KeySchema": [
     {
-      "AttributeName": "EngagementEventId",
+      "AttributeName": "EngagementId",
       "KeyType": "HASH"
-    },
-    {
-      "AttributeName": "EngagementVersion",
-      "KeyType": "Range"
     }
   ],
   "GlobalSecondaryIndexes": [
@@ -57,7 +53,7 @@
       "IndexName": "ProjectManagerIndex",
       "KeySchema": [
         {
-          "AttributeName": "ProjectManagerAlias",
+          "AttributeName": "ProjectManager",
           "KeyType": "HASH"
         }
       ],
@@ -74,7 +70,7 @@
       "IndexName": "TeamsIndex",
       "KeySchema": [
         {
-          "AttributeName": "Teams",
+          "AttributeName": "TeamsName",
           "KeyType": "HASH"
         }
       ],
@@ -90,7 +86,7 @@
       "IndexName": "SegmentIndex",
       "KeySchema": [
         {
-          "AttributeName": "SegmentAlias",
+          "AttributeName": "Segment",
           "KeyType": "HASH"
         }
       ],

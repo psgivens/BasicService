@@ -10,7 +10,6 @@ let endpointDomain = "ddb-local"
 let endpointPort = 8000
 let endpoint = sprintf "http://%s:%d" endpointDomain endpointPort
 
-let tableName = "EventSourceTable"
 
 printfn "  -- Setting up a DynamoDB-Local client (DynamoDB Local seems to be running)" 
 let ddbConfig = AmazonDynamoDBConfig ( ServiceURL = endpoint )
@@ -20,7 +19,7 @@ printfn "doing the work"
 let main argv =
     use client = new AmazonDynamoDBClient(ddbConfig)
 
-    let envDao = EventEnvelopeDao ([EngagementEventConverter ()], client, tableName, "sample_user")
+    let envDao = EventEnvelopeDao ([EngagementEventConverter ()], client, "sample_user")
 
     let id = "c292cd6c-4d32-461d-bff9-7b5f3bfae82b"
     let version = "1"
