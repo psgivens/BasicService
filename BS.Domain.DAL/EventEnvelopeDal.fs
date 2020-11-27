@@ -93,10 +93,12 @@ module EventEnvelopeDal =
          *****************************)
 
         member _.GetEnvelope id version : Envelope =
-          getItem 
-            client tableName readEnvelope  
+          getItem client tableName readEnvelope  
             [ ("EventId", ScalarString id)
               ("EventVersion", ScalarString version)]
+
+        member _.GetEnvelopes id : Envelope list =
+          getItems client tableName readEnvelope id
 
         member _.InsertEventEnvelope (envelope:Envelope) = 
             putItem client tableName <| eventToAttributes envelope

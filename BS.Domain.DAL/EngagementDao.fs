@@ -21,6 +21,10 @@ type CreateEngagementRequest = EngagementCreatedDetails
 
 type EngagementDao (envDao:EventEnvelopeDao) =
 
+    let buildQueryEngagement id = 
+        let events = envDao.GetEnvelope
+        ()
+
     member dao.MakeSampleEngagement () = 
         {
             EngagementCreatedDetails.CustomerName = "Big Good Corporation"
@@ -37,10 +41,18 @@ type EngagementDao (envDao:EventEnvelopeDao) =
         }
 
     member dao.CreateEngagement (engagement:CreateEngagementRequest) = 
+        let id = ((System.Guid.NewGuid ()).ToString())
         Created engagement 
-        |> envDao.Envelop ((System.Guid.NewGuid ()).ToString()) "1" 
+        |> envDao.Envelop id "1" 
         |> envDao.InsertEventEnvelope 
-
+        |> fun result ->
+           match result with 
+           | Ok () -> id
+           | Error message -> failwith message
+        |> envDao.GetEnvelopes 
+        |> List.map (fun env -> env.Event :?> EngagementEvent)
+        |> List.fold evolve None
+        // TODO: Put the item into the Enagagement table
 
     member dao.UpdateEngagement id version (engagement:EngagementCreatedDetails) = 
         let events = getItem

@@ -49,7 +49,8 @@ type EngagementState = {
 
 let evolve (state: EngagementState option) (event:EngagementEvent) =
     match state, event with
-    | None, Created details -> {
+    | None, Created details -> 
+        {
             EngagementState.CustomerName    = details.CustomerName 
             ProjectName                     = details.ProjectName 
             SfdcProjectId                   = details.SfdcProjectId 
@@ -57,7 +58,7 @@ let evolve (state: EngagementState option) (event:EngagementEvent) =
             SecurityOwner                   = details.SecurityOwner |> Option.defaultValue ""
             Team                            = details.Team |> Option.defaultValue ""
             Cti                             = details.Cti |> Option.defaultValue { CTI.Category=""; Type=""; Item="" }
-        }
+        } |> Some
     | Some s, Updated d -> 
         let (|?) o1 dv = o1 |> Option.defaultValue dv
         {
@@ -68,5 +69,5 @@ let evolve (state: EngagementState option) (event:EngagementEvent) =
             SecurityOwner                   = d.SecurityOwner |? s.SecurityOwner
             Team                            = d.Team |? s.Team
             Cti                             = d.Cti |? s.Cti
-        }
+        } |> Some
     | _,_ -> failwith "invalid event"

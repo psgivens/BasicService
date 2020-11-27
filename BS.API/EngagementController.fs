@@ -45,23 +45,17 @@ type EngagementController (createClient:unit -> AmazonDynamoDBClient, tableName:
                 let envDao = EventEnvelopeDao ([EngagementEventConverter ()], client, tableName, "sample_user")
 
                 let dao = EngagementDao envDao
-
-                let verify = function
-                    | "" | null -> None
+                
+                let optString = function
+                    | s when System.String.IsNullOrWhiteSpace(s) -> None
                     | value -> Some value
 
-                let (|HasValue|_|) value = verify value
-
                 let (|?!) (value:string) (name:string) = 
-                    match verify value with
-                    | None -> invalidArg name "String cannot be empty"
-                    | Some v -> v
-
-                let optString (value:string) = verify value
+                    optString value |> Option.defaultWith (invalidArg name "String cannot be empty")
 
                 let optCti cti =
                     let { CtiDto.Category=c; Type=t; Item=i } = cti
-                    match (verify c, verify t, verify i) with 
+                    match (optString c, optString t, optString i) with 
                     | None, None, None -> None
                     | Some c', Some t', Some i' -> Some {
                             CTI.Category = c'
@@ -70,22 +64,20 @@ type EngagementController (createClient:unit -> AmazonDynamoDBClient, tableName:
                         }
                     | _ -> invalidArg "Cti" "Optional parameter incomplete"
 
-                // let item = dao.MakeSampleEngagement ()
-                dao.CreateEngagement {
-                    CreateEngagementRequest.CustomerName =  dto.CustomerName |?! "CustomerName"
-                    ProjectName = dto.ProjectName |?! "ProjectName"
-                    SfdcProjectId = dto.SfdcProjectId |?! "SfdcProjectId"
-                    SfdcProjectSlug = dto.SfdcProjectSlug |?! "SfdcProjectSlug"
-                    SecurityOwner = optString dto.SecurityOwner
-                    Team = optString dto.Team
-                    Cti = optCti dto.Cti
-                } |> ignore
+                try
+                    // let item = dao.MakeSampleEngagement ()
+                    let id =dao.CreateEngagement {
+                        CreateEngagementRequest.CustomerName =  dto.CustomerName |?! "CustomerName"
+                        ProjectName = dto.ProjectName |?! "ProjectName"
+                        SfdcProjectId = dto.SfdcProjectId |?! "SfdcProjectId"
+                        SfdcProjectSlug = dto.SfdcProjectSlug |?! "SfdcProjectSlug"
+                        SecurityOwner = optString dto.SecurityOwner
+                        Team = optString dto.Team
+                        Cti = optCti dto.Cti
+                    } 
                 
-                // EventEnvelopeDal.putEnvelope () |> ignore
-
-
-
-
-                // Sends the object back to the client
-                return! Successful.OK dto next ctx
+                    // Sends the object back to the client
+                    return! Successful.OK id next ctx
+                with 
+                    | _ -> return! ServerErrors.SERVICE_UNAVAILABLE "Something went wrong" next ctx
             }

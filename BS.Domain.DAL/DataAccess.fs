@@ -126,6 +126,19 @@ module DataAccess =
       |> fun r -> r.Item
       |> Reader.run reader
 
+    let getItems (client:AmazonDynamoDBClient) tableName (reader:Reader<Attributes,'a>) id' = 
+      QueryRequest (
+        TableName = tableName,
+        KeyConditionExpression = "EventId = :v_Id",
+        ExpressionAttributeValues = mapAttrsToDictionary [ (":v_Id", ScalarString id') ]
+      )
+      |> client.QueryAsync
+      |> Async.AwaitTask
+      |> Async.RunSynchronously
+      |> fun r -> r.Items
+      |> List.ofSeq
+      |> List.map (Reader.run reader)
+
     type EventSourceReader = Reader<Attributes,IEventSourcingEvent>
 
     type IEventConverter = 
