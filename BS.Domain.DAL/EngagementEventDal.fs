@@ -25,9 +25,9 @@ module EngagementEventDal =
               ("ProjectName", ScalarString ee.ProjectName)
               ("SfdcProjectId", ScalarString ee.SfdcProjectId)
               ("SfdcProjectSlug", ScalarString ee.SfdcProjectSlug)
-              ("SecurityOwner", ScalarStringOpt ee.SecurityOwner)
-              ("Team", ScalarStringOpt ee.Team)
-              ("CTI", DocMapOpt <| Option.map ctiToAttributes ee.Cti) ]         
+              ("SecurityOwner", ScalarString ee.SecurityOwner)
+              ("Team", ScalarString ee.Team)
+              ("CTI", DocMap <| ctiToAttributes ee.Cti) ]         
 
         let engagementEventToAttributes (event:EngagementEvent) = 
             match event with
@@ -67,10 +67,9 @@ module EngagementEventDal =
             |> Reader.readString "ProjectName"
             |> Reader.readString "SfdcProjectId"
             |> Reader.readString "SfdcProjectSlug"
-            |> Reader.readStringOpt "SecurityOwner"
-            |> Reader.readStringOpt "Team"
-            |> Reader.readNestedOpt "CTI" readCti
-
+            |> Reader.readString "SecurityOwner"
+            |> Reader.readString "Team"
+            |> Reader.readNested "CTI" readCti
 
         interface IEventConverter with
             member _.GetReader (``type``:string) (action:string) : EventSourceReader option =

@@ -22,6 +22,14 @@ type CtiDto = {
     Item: string
 }
 
+module CtiDto =
+    let toCti dto = {
+        CTI.Category = dto.Category
+        Type = dto.Type
+        Item = dto.Item
+        }
+
+
 [<CLIMutable>]
 type EngagementDto = {
     CustomerName: string 
@@ -33,17 +41,17 @@ type EngagementDto = {
     Cti: CtiDto
     }
 
-
-type EngagementController (createClient:unit -> AmazonDynamoDBClient) = 
+type EngagementController 
+    (   createClient:unit -> AmazonDynamoDBClient,
+        createEnvelopeDao: EventEnvelopeDaoFactory
+    ) = 
     let client = createClient ()
     member _.SubmitEngagement : HttpHandler =
         fun (next : HttpFunc) (ctx : HttpContext) ->
             task {
-                // Binds a JSON payload to a Car object
                 let! dto = ctx.BindJsonAsync<EngagementDto>()
-
-                let envDao = EventEnvelopeDao ([EngagementEventConverter ()], client, "sample_user")
-
+                // let envDao = EventEnvelopeDao ([EngagementEventConverter ()], client, "sample_user")
+                let envDao = createEnvelopeDao client "sample_user"
                 let dao = EngagementDao (envDao, client)
                 
                 let optString = function
@@ -71,9 +79,9 @@ type EngagementController (createClient:unit -> AmazonDynamoDBClient) =
                         ProjectName = dto.ProjectName |?! "ProjectName"
                         SfdcProjectId = dto.SfdcProjectId |?! "SfdcProjectId"
                         SfdcProjectSlug = dto.SfdcProjectSlug |?! "SfdcProjectSlug"
-                        SecurityOwner = optString dto.SecurityOwner
-                        Team = optString dto.Team
-                        Cti = optCti dto.Cti
+                        SecurityOwner = dto.SecurityOwner
+                        Team = dto.Team
+                        Cti = CtiDto.toCti dto.Cti
                     } 
                 
                     // Sends the object back to the client

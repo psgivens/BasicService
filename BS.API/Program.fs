@@ -17,6 +17,9 @@ open BS.API
 open BS.API.Controllers
 
 open Amazon.DynamoDBv2
+open BS.Domain.DAL.EngagementEventDal
+open BS.Domain.DAL.EventEnvelopeDal
+open BS.Domain.DAL.DataAccess
 
 
 let endpointDomain = "ddb-local"
@@ -95,12 +98,18 @@ let indexHandler (name : string) =
     let view      = Views.index model
     htmlView view
 
+
 let webApp =
+
+    // Build dependencies
     let createClient () = new AmazonDynamoDBClient(ddbConfig)
-    let controller = EngagementController (createClient)
+    let eventConverters: IEventConverter list = [EngagementEventConverter ()] |> List.map (fun c -> c :> IEventConverter)
+    let createEventEnvelopeDao = createEventEnvelopeFactory eventConverters
+    let engagementController = EngagementController (createClient, createEventEnvelopeDao)
+
     choose [
         route "/engagements" >=>
-            POST >=> controller.SubmitEngagement 
+            POST >=> engagementController.SubmitEngagement 
         GET >=>
             choose [
                 route "/" >=> indexHandler "world"

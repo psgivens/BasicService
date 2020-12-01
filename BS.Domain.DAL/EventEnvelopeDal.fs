@@ -113,3 +113,11 @@ module EventEnvelopeDal =
                 TimeStamp = DateTime.Now.ToString()
                 Event = event
             }
+
+    type EventEnvelopeDaoFactory = AmazonDynamoDBClient -> string -> EventEnvelopeDao
+
+    let createEventEnvelopeFactory (eventConverters:IEventConverter list) : EventEnvelopeDaoFactory=
+        fun client userName -> EventEnvelopeDao (eventConverters, client, userName)
+
+
+    

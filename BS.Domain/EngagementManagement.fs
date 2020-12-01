@@ -8,14 +8,19 @@ type CTI = {
     Item: string
 }
 
+// TODO: Add logic to use RequiredString where appropriate
+// type RequiredString (value: string) =
+//     member _.ToString () =
+//         value
+
 type EngagementCreatedDetails = {
     CustomerName: string
     ProjectName: string
     SfdcProjectId: string
     SfdcProjectSlug: string
-    SecurityOwner: string option
-    Team: string option    
-    Cti: CTI option
+    SecurityOwner: string
+    Team: string
+    Cti: CTI
 }
 
 type EngagementUpdatedDetails = {
@@ -55,9 +60,9 @@ let evolve (state: EngagementState option) (event:EngagementEvent) =
             ProjectName                     = details.ProjectName 
             SfdcProjectId                   = details.SfdcProjectId 
             SfdcProjectSlug                 = details.SfdcProjectSlug 
-            SecurityOwner                   = details.SecurityOwner |> Option.defaultValue ""
-            Team                            = details.Team |> Option.defaultValue ""
-            Cti                             = details.Cti |> Option.defaultValue { CTI.Category=""; Type=""; Item="" }
+            SecurityOwner                   = details.SecurityOwner 
+            Team                            = details.Team 
+            Cti                             = details.Cti 
         } |> Some
     | Some s, Updated d -> 
         let (|?) o1 dv = o1 |> Option.defaultValue dv

@@ -42,13 +42,13 @@ type EngagementDao (envDao:EventEnvelopeDao, client:AmazonDynamoDBClient) =
             ProjectName = "A major project"
             SfdcProjectId = "PROJ-1234"
             SfdcProjectSlug = "abc10324kjlaskdfjhv"
-            SecurityOwner = "Spider man" |> Some
-            Team = "Justice league" |> Some
+            SecurityOwner = "Spider man" 
+            Team = "Justice league" 
             Cti = {
                 Category = "AWS"
                 Type = "ProServe"
                 Item = "EngSec"
-            } |> Some
+            } 
         }
 
     member _.CreateEngagement (engagement:CreateEngagementRequest) = 
