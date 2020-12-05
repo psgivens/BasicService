@@ -1,5 +1,6 @@
 namespace BS.Domain.DAL
 
+open BS.Domain.Common
 open BS.Domain.EngagementManagement
 open BS.Domain.DAL.DataAccess
 
@@ -48,7 +49,7 @@ module EngagementEventDal =
             |> Reader.readString "Type"
             |> Reader.readString "Item"
 
-        let buildCreatedEvent customerName projectName sfdcId sfdcProjectSlug securityOwner team cti :IEventSourcingEvent =
+        let buildCreatedEvent troopId customerName projectName sfdcId sfdcProjectSlug securityOwner team cti :IEventSourcingEvent =
             { 
                 EngagementCreatedDetails.CustomerName = customerName
                 ProjectName = projectName
@@ -57,12 +58,14 @@ module EngagementEventDal =
                 SecurityOwner = securityOwner
                 Team = team
                 Cti = cti
+                TroopId = troopId
             } 
             |> Created 
             :> IEventSourcingEvent
 
         let engagementCreatedReader :EventSourceReader = 
             Reader.withBuilder buildCreatedEvent
+            |> Reader.readString "TroopId"
             |> Reader.readString "CustomerName"
             |> Reader.readString "ProjectName"
             |> Reader.readString "SfdcProjectId"

@@ -17,9 +17,6 @@ services:
       - bs-domain-bin:/workspace/BS.Domain/bin
       - bs-domain-obj:/workspace/BS.Domain/obj
 
-      - bs-domain-dal-bin:/workspace/BS.Domain.DAL/bin
-      - bs-domain-dal-obj:/workspace/BS.Domain.DAL/obj
-
       - bs-unit-tests-bin:/workspace/BS.UnitTests/bin
       - bs-unit-tests-obj:/workspace/BS.UnitTests/obj
 
@@ -63,8 +60,6 @@ volumes:
   bs-api-obj:
   bs-domain-bin:
   bs-domain-obj:
-  bs-domain-dal-bin:
-  bs-domain-dal-obj:
   bs-unit-tests-bin:
   bs-unit-tests-obj:
   bs-cli-bin:

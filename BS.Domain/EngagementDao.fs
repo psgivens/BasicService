@@ -36,7 +36,7 @@ type EngagementDao (envDao:EventEnvelopeDao, client:AmazonDynamoDBClient) =
           ("CTI", DocMap <| ctiToAttributes e.Cti) 
           ("TimeStamp", ScalarString (DateTime.Now.ToString ()))]
 
-    member _.MakeSampleEngagement () = 
+    member _.MakeSampleEngagement (troopId: string) = 
         {
             EngagementCreatedDetails.CustomerName = "Big Good Corporation"
             ProjectName = "A major project"
@@ -49,12 +49,17 @@ type EngagementDao (envDao:EventEnvelopeDao, client:AmazonDynamoDBClient) =
                 Type = "ProServe"
                 Item = "EngSec"
             } 
+            TroopId = troopId
         }
 
     member _.CreateEngagement (engagement:CreateEngagementRequest) = 
         let id = ((Guid.NewGuid ()).ToString())
-        Created engagement 
-        |> envDao.Envelop id "1" 
+        let evts = 
+            EngagementCommand.Create engagement 
+            |> envDao.EnvelopCommand id 
+            |> EngagementHandlers.handle
+
+        evts
         |> envDao.InsertEventEnvelope 
         |> fun result ->
            match result with 

@@ -10,10 +10,9 @@ open Amazon.DynamoDBv2
 open BS.Domain.DAL
 open BS.Domain.EngagementManagement
 
-type Message =
-    {
-        Text : string
-    }
+type Message = {
+    Text : string
+}
 
 [<CLIMutable>]
 type CtiDto = {
@@ -39,6 +38,7 @@ type EngagementDto = {
     SecurityOwner: string 
     Team: string  
     Cti: CtiDto
+    TroopId: string
     }
 
 type EngagementController 
@@ -58,9 +58,6 @@ type EngagementController
                     | s when System.String.IsNullOrWhiteSpace(s) -> None
                     | value -> Some value
 
-                let (|?!) (value:string) (name:string) = 
-                    optString value |> Option.defaultWith (fun () -> invalidArg name "String cannot be empty")
-
                 let optCti cti =
                     let { CtiDto.Category=c; Type=t; Item=i } = cti
                     match (optString c, optString t, optString i) with 
@@ -72,6 +69,9 @@ type EngagementController
                         }
                     | _ -> invalidArg "Cti" "Optional parameter incomplete"
 
+                let (|?!) (value:string) (name:string) = 
+                    optString value |> Option.defaultWith (fun () -> invalidArg name "String cannot be empty")
+
                 try
                     // let item = dao.MakeSampleEngagement ()
                     let id = dao.CreateEngagement {
@@ -82,6 +82,7 @@ type EngagementController
                         SecurityOwner = dto.SecurityOwner
                         Team = dto.Team
                         Cti = CtiDto.toCti dto.Cti
+                        TroopId = dto.TroopId
                     } 
                 
                     // Sends the object back to the client

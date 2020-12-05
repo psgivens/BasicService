@@ -1,6 +1,7 @@
 module BS.Domain.EngagementManagement
 
-type IEventSourcingEvent = interface end
+open System
+open BS.Domain.Common
 
 type CTI = {
     Category: string
@@ -21,6 +22,7 @@ type EngagementCreatedDetails = {
     SecurityOwner: string
     Team: string
     Cti: CTI
+    TroopId: string    
 }
 
 type EngagementUpdatedDetails = {
@@ -36,6 +38,7 @@ type EngagementUpdatedDetails = {
 type EngagementCommand =
     | Create of EngagementCreatedDetails
     | Update of EngagementUpdatedDetails
+    interface IEventSourcingCommand
 
 type EngagementEvent =
     | Created of EngagementCreatedDetails
@@ -50,6 +53,7 @@ type EngagementState = {
     SecurityOwner: string 
     Team: string  
     Cti: CTI 
+    TroopId: string
 }
 
 let evolve (state: EngagementState option) (event:EngagementEvent) =
@@ -63,10 +67,11 @@ let evolve (state: EngagementState option) (event:EngagementEvent) =
             SecurityOwner                   = details.SecurityOwner 
             Team                            = details.Team 
             Cti                             = details.Cti 
+            TroopId                         = details.TroopId
         } |> Some
     | Some s, Updated d -> 
         let (|?) o1 dv = o1 |> Option.defaultValue dv
-        {
+        { s with
             EngagementState.CustomerName    = d.CustomerName |? s.CustomerName 
             ProjectName                     = d.ProjectName |? s.ProjectName
             SfdcProjectId                   = d.SfdcProjectId |? s.SfdcProjectId
