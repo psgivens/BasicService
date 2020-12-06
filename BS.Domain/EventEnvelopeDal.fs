@@ -96,10 +96,15 @@ module EventEnvelopeDal =
         member _.GetEnvelopesAsync id : Task<EvtEnvelope list> =
           getItems client tableName readEnvelope id
 
-        // TODO: Create InsertEventEnveloeps with putItems with BatchWriteItem instead of pushing one at a time. 
-        member _.InsertEventEnvelope (envelope:EvtEnvelope) : Task<Result<string, string>> = 
+        member _.InsertEventEnvelopesAsync (envelopes:EvtEnvelope list) : Task<Result<string list, string>> = 
             task {
-                // TODO: Use putItems with BatchWriteItem instead of pushing one at a time. 
+                let attributes = envelopes |> List.map eventToAttributes 
+                let! result = putItems client tableName attributes
+                return result |> Result.map (fun _ -> envelopes |> List.map (fun envelope -> envelope.Id))
+            }
+
+        member _.InsertEventEnvelopeAsync (envelope:EvtEnvelope) : Task<Result<string, string>> = 
+            task {
                 let attributes =  eventToAttributes envelope
                 let! result = putItem client tableName attributes
                 return result |> Result.map (fun _ -> envelope.Id)
@@ -127,9 +132,11 @@ module EventEnvelopeDal =
     let createEventEnvelopeFactory (eventConverters:IEventConverter list) : EventEnvelopeDaoFactory=
         fun client userName -> EventEnvelopeDao (eventConverters, client, userName)
 
-    let buildState<'Event, 'State when 'Event :> IEventSourcingEvent> (evolver:DomainEvolver<'Event, 'State>) (envDao:EventEnvelopeDao) id = 
+
+    type EnvelopesFetcher = string -> Task<EvtEnvelope list>
+    let buildState<'Event, 'State when 'Event :> IEventSourcingEvent> (evolver:DomainEvolver<'Event, 'State>) (getEnvelopesAsync:EnvelopesFetcher) id = 
         task {
-            let! envs = envDao.GetEnvelopesAsync id
+            let! envs = getEnvelopesAsync id
             let engagementVersion = 
                 envs
                 |> List.maxBy (fun env -> int env.Version)
@@ -142,17 +149,12 @@ module EventEnvelopeDal =
             return engagementVersion, state
         }
 
-    let postEnvelopes (envDao:EventEnvelopeDao) envelopes = 
+    let postEnvelopesAsync (envDao:EventEnvelopeDao) envelopes : Task<string list> = 
         task {
-            // TODO: Use InsertEventEnveloeps with putItems with BatchWriteItem instead of pushing one at a time. 
-            let! ids = 
-                envelopes
-                |> List.map envDao.InsertEventEnvelope 
-                |> Task.WhenAll
+            let! result = envDao.InsertEventEnvelopesAsync envelopes
+
             return 
-                ids 
-                |> List.ofArray
-                |> List.map (function
-                    | Ok value -> value
-                    | Error error -> failwith error)
+                match result with
+                | Ok ids -> ids
+                | Error error -> failwith error
         }        

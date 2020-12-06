@@ -64,8 +64,6 @@ type EngagementDao (envDao:EventEnvelopeDao, client:AmazonDynamoDBClient) =
                 |> envDao.EnvelopCommand id 
                 |> handle
 
-            return results
-            // TODO Check for errors and raise them. 
             // TODO Retrieve ids of objects, build state, and store state. 
 
             // evts
@@ -80,6 +78,8 @@ type EngagementDao (envDao:EventEnvelopeDao, client:AmazonDynamoDBClient) =
             // |> Option.get
             // |> engagementToAttributes id
             // |> putItem client engagementsTable 
+            
+            return results
         }
 
     member _.UpdateEngagement id version (engagement:EngagementCreatedDetails) = 
@@ -87,6 +87,6 @@ type EngagementDao (envDao:EventEnvelopeDao, client:AmazonDynamoDBClient) =
 
         Created engagement 
         |> envDao.EnvelopEvent ((System.Guid.NewGuid ()).ToString()) "1" 
-        |> envDao.InsertEventEnvelope 
+        |> envDao.InsertEventEnvelopeAsync 
 
 

@@ -111,12 +111,35 @@ module DataAccess =
         let readDoc = _extractOpt key (fun attr -> attr.M)
         ((fun d' -> readDoc d' |> Option.map (run (subReader d'))) |> Reader |> apply)
 
-    // TODO: create putItems with BatchWriteItem 
     let putItem (client:AmazonDynamoDBClient) (tableName:string) fields : Task<Result<Unit, string>> =
       task {
         let! response = 
           PutItemRequest (tableName, mapAttrsToDictionary fields)
           |> client.PutItemAsync
+
+        return 
+          match response.HttpStatusCode with
+          | HttpStatusCode.OK -> Ok ()
+          | status -> Error <| sprintf "Unexpected status code '%A'" status
+      }
+
+    let putItems (client:AmazonDynamoDBClient) (tableName:string) (fields:Attr list list) : Task<Result<Unit, string>> =
+      task {
+        let writeItems  = 
+          fields
+          |> List.map (
+              mapAttrsToDictionary 
+              >> PutRequest 
+              >> WriteRequest)
+          |> System.Collections.Generic.List 
+
+        let request = 
+          [(tableName, writeItems)]
+          |> dict
+          |> Dictionary<string, List<WriteRequest>>
+          |> BatchWriteItemRequest
+
+        let! response = client.BatchWriteItemAsync request
 
         return 
           match response.HttpStatusCode with
