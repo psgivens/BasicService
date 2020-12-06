@@ -118,7 +118,7 @@ module EventEnvelopeDal =
                 Command = command
             }
 
-        member _.EnvelopEvent id version event =
+        member _.EnvelopEvent id version event :EvtEnvelope=
             {
                 EvtEnvelope.Id = id
                 Version = version
@@ -127,8 +127,10 @@ module EventEnvelopeDal =
                 Event = event
             }
 
-    type EventEnvelopeDaoFactory = AmazonDynamoDBClient -> string -> EventEnvelopeDao
+    type EnvelopCommand = string -> IEventSourcingCommand -> CmdEnvelope
+    type EnvelopEvent<'Event when 'Event:>IEventSourcingEvent> = string -> string -> 'Event -> EvtEnvelope
 
+    type EventEnvelopeDaoFactory = AmazonDynamoDBClient -> string -> EventEnvelopeDao
     let createEventEnvelopeFactory (eventConverters:IEventConverter list) : EventEnvelopeDaoFactory=
         fun client userName -> EventEnvelopeDao (eventConverters, client, userName)
 
@@ -137,7 +139,7 @@ module EventEnvelopeDal =
     let buildState<'Event, 'State when 'Event :> IEventSourcingEvent> (evolver:DomainEvolver<'Event, 'State>) (getEnvelopesAsync:EnvelopesFetcher) id = 
         task {
             let! envs = getEnvelopesAsync id
-            let engagementVersion = 
+            let version = 
                 envs
                 |> List.maxBy (fun env -> int env.Version)
                 |> fun env -> int env.Version
@@ -146,12 +148,13 @@ module EventEnvelopeDal =
                 envs
                 |> List.map (fun env -> env.Event :?> 'Event)
                 |> List.fold evolver None
-            return engagementVersion, state
+            return version, state
         }
 
-    let postEnvelopesAsync (envDao:EventEnvelopeDao) envelopes : Task<string list> = 
+    type InsertEventEnvelopesAsync = list<EvtEnvelope> -> Task<Result<list<string>,string>>
+    let postEnvelopesAsync (insertEventEnvelopesAsync:InsertEventEnvelopesAsync) envelopes : Task<string list> = 
         task {
-            let! result = envDao.InsertEventEnvelopesAsync envelopes
+            let! result = insertEventEnvelopesAsync envelopes
 
             return 
                 match result with

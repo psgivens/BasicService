@@ -11,18 +11,24 @@ open BS.Domain.DAL
 open BS.Domain.DAL.EventEnvelopeDal
 
 module EngagementHandlers =
-    let createHandler (envDao:EventEnvelopeDao) : DomainHandler=         
-        let postEnvelopesAsync = EventEnvelopeDal.postEnvelopesAsync envDao
+    type HandlerDependencies = {
+        InsertEventEnvelopesAsync:InsertEventEnvelopesAsync
+        GetEnvelopesAsync:EnvelopesFetcher
+        EnvelopEngagement:EnvelopEvent<EngagementEvent>
+        EnvelopTroop:EnvelopEvent<TroopEvent>
+    }
+    let createHandler (ext:HandlerDependencies) : DomainHandler=         
+        let postEnvelopesAsync = EventEnvelopeDal.postEnvelopesAsync ext.InsertEventEnvelopesAsync
         fun (cmdenv: CmdEnvelope) ->
             task {
                 let buildState = EventEnvelopeDal.buildState EngagementManagement.evolve
-                let! version, state = buildState envDao.GetEnvelopesAsync cmdenv.Id 
-                let envelopEngagement (e:EngagementEvent) = envDao.EnvelopEvent cmdenv.Id version e
+                let! version, state = buildState ext.GetEnvelopesAsync cmdenv.Id 
+                let envelopEngagement (e:EngagementEvent) = ext.EnvelopEngagement cmdenv.Id version e
 
                 let createEngagement id (details:EngagementCreatedDetails) = 
                     task {
-                        let! troopVersion, _ = EventEnvelopeDal.buildState TroopManagement.evolve envDao.GetEnvelopesAsync cmdenv.Id
-                        let envelopTroop (e:TroopEvent) = envDao.EnvelopEvent details.TroopId troopVersion e
+                        let! troopVersion, _ = EventEnvelopeDal.buildState TroopManagement.evolve ext.GetEnvelopesAsync cmdenv.Id
+                        let envelopTroop (e:TroopEvent) = ext.EnvelopTroop details.TroopId troopVersion e
 
                         return! 
                             [ EngagementEvent.Created details |> envelopEngagement
@@ -42,13 +48,18 @@ module EngagementHandlers =
             }
 
 module TroopHandlers =
-    let createHandler (envDao:EventEnvelopeDao) : DomainHandler =         
-        let postEnvelopes = EventEnvelopeDal.postEnvelopesAsync envDao
+    type HandlerDependencies = {
+        InsertEventEnvelopesAsync:InsertEventEnvelopesAsync
+        GetEnvelopesAsync:EnvelopesFetcher
+        EnvelopEvent:EnvelopEvent<TroopEvent>
+    }
+    let createHandler (ext:HandlerDependencies) : DomainHandler =         
+        let postEnvelopes = EventEnvelopeDal.postEnvelopesAsync ext.InsertEventEnvelopesAsync
         fun (cmdenv: CmdEnvelope) ->
             task {
                 let buildState = EventEnvelopeDal.buildState TroopManagement.evolve
-                let! version, state = buildState envDao.GetEnvelopesAsync cmdenv.Id
-                let envelopTroop (e:TroopEvent) = envDao.EnvelopEvent cmdenv.Id version e
+                let! version, state = buildState ext.GetEnvelopesAsync cmdenv.Id
+                let envelopTroop (e:TroopEvent) = ext.EnvelopEvent cmdenv.Id version e
 
                 return! 
                     match state, cmdenv.Command :?> TroopCommand with 

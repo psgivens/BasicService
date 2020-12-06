@@ -8,10 +8,6 @@ open Amazon.DynamoDBv2.Model
 open System.Collections.Generic
 
 open System
-open System.IO
-open System.IO.Compression
-open System.Net
-open System.Threading.Tasks
 open FSharp.Control.Tasks.V2
 
 open BS.Domain
@@ -24,8 +20,13 @@ open BS.Domain.Handlers
 type CreateEngagementRequest = EngagementCreatedDetails
 
 type EngagementDao (envDao:EventEnvelopeDao, client:AmazonDynamoDBClient) =
-    let engagementsTable = "EngagementsTable"
-    let handle = EngagementHandlers.createHandler envDao
+    // let engagementsTable = "EngagementsTable"
+    let handle = EngagementHandlers.createHandler {
+            EngagementHandlers.HandlerDependencies.InsertEventEnvelopesAsync = envDao.InsertEventEnvelopesAsync
+            GetEnvelopesAsync = envDao.GetEnvelopesAsync
+            EnvelopEngagement = envDao.EnvelopEvent
+            EnvelopTroop = envDao.EnvelopEvent
+        }
 
     let engagementToAttributes id (e:EngagementState)=
         [ ("EngagementId", ScalarString id)
@@ -88,5 +89,3 @@ type EngagementDao (envDao:EventEnvelopeDao, client:AmazonDynamoDBClient) =
         Created engagement 
         |> envDao.EnvelopEvent ((System.Guid.NewGuid ()).ToString()) "1" 
         |> envDao.InsertEventEnvelopeAsync 
-
-
