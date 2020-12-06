@@ -1,6 +1,9 @@
 namespace BS.Domain.DAL
 
 
+open FSharp.Control.Tasks.V2
+open System.Threading.Tasks
+
 open System
 
 open BS.Domain.Common
@@ -90,11 +93,17 @@ module EventEnvelopeDal =
             [ ("EventId", ScalarString id)
               ("EventVersion", ScalarString version)]
 
-        member _.GetEnvelopes id : EvtEnvelope list =
+        member _.GetEnvelopesAsync id : Task<EvtEnvelope list> =
           getItems client tableName readEnvelope id
 
-        member _.InsertEventEnvelope (envelope:EvtEnvelope) = 
-            putItem client tableName <| eventToAttributes envelope
+        // TODO: Create InsertEventEnveloeps with putItems with BatchWriteItem instead of pushing one at a time. 
+        member _.InsertEventEnvelope (envelope:EvtEnvelope) : Task<Result<string, string>> = 
+            task {
+                // TODO: Use putItems with BatchWriteItem instead of pushing one at a time. 
+                let attributes =  eventToAttributes envelope
+                let! result = putItem client tableName attributes
+                return result |> Result.map (fun _ -> envelope.Id)
+            }
 
         member _.EnvelopCommand id command :CmdEnvelope=
             {
@@ -119,14 +128,31 @@ module EventEnvelopeDal =
         fun client userName -> EventEnvelopeDao (eventConverters, client, userName)
 
     let buildState<'Event, 'State when 'Event :> IEventSourcingEvent> (evolver:DomainEvolver<'Event, 'State>) (envDao:EventEnvelopeDao) id = 
-        let envs = envDao.GetEnvelopes id
-        let engagementVersion = 
-            envs
-            |> List.maxBy (fun env -> int env.Version)
-            |> fun env -> int env.Version
-            |> fun version -> ((version+1).ToString ())
-        let state = 
-            envs
-            |> List.map (fun env -> env.Event :?> 'Event)
-            |> List.fold evolver None
-        engagementVersion, state
+        task {
+            let! envs = envDao.GetEnvelopesAsync id
+            let engagementVersion = 
+                envs
+                |> List.maxBy (fun env -> int env.Version)
+                |> fun env -> int env.Version
+                |> fun version -> ((version+1).ToString ())
+            let state = 
+                envs
+                |> List.map (fun env -> env.Event :?> 'Event)
+                |> List.fold evolver None
+            return engagementVersion, state
+        }
+
+    let postEnvelopes (envDao:EventEnvelopeDao) envelopes = 
+        task {
+            // TODO: Use InsertEventEnveloeps with putItems with BatchWriteItem instead of pushing one at a time. 
+            let! ids = 
+                envelopes
+                |> List.map envDao.InsertEventEnvelope 
+                |> Task.WhenAll
+            return 
+                ids 
+                |> List.ofArray
+                |> List.map (function
+                    | Ok value -> value
+                    | Error error -> failwith error)
+        }        

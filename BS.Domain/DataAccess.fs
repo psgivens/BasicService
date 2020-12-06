@@ -1,5 +1,8 @@
 namespace BS.Domain.DAL
 
+open FSharp.Control.Tasks.V2
+open System.Threading.Tasks
+
 open Amazon.DynamoDBv2
 open Amazon.DynamoDBv2.Model
 
@@ -108,15 +111,18 @@ module DataAccess =
         let readDoc = _extractOpt key (fun attr -> attr.M)
         ((fun d' -> readDoc d' |> Option.map (run (subReader d'))) |> Reader |> apply)
 
-    let putItem (client:AmazonDynamoDBClient) (tableName:string) fields : Result<Unit, string> =
-      PutItemRequest (tableName, mapAttrsToDictionary fields)
-      |> client.PutItemAsync
-      |> Async.AwaitTask
-      |> Async.RunSynchronously
-      |> fun r ->
-        match r.HttpStatusCode with
-        | HttpStatusCode.OK -> Ok ()
-        | status -> Error <| sprintf "Unexpected status code '%A'" status
+    // TODO: create putItems with BatchWriteItem 
+    let putItem (client:AmazonDynamoDBClient) (tableName:string) fields : Task<Result<Unit, string>> =
+      task {
+        let! response = 
+          PutItemRequest (tableName, mapAttrsToDictionary fields)
+          |> client.PutItemAsync
+
+        return 
+          match response.HttpStatusCode with
+          | HttpStatusCode.OK -> Ok ()
+          | status -> Error <| sprintf "Unexpected status code '%A'" status
+      }
 
     let getItem (client:AmazonDynamoDBClient) tableName (reader:Reader<Attributes,'a>) fields =
       GetItemRequest (tableName, mapAttrsToDictionary fields)
@@ -127,17 +133,19 @@ module DataAccess =
       |> Reader.run reader
 
     let getItems (client:AmazonDynamoDBClient) tableName (reader:Reader<Attributes,'a>) id' = 
-      QueryRequest (
-        TableName = tableName,
-        KeyConditionExpression = "EventId = :v_Id",
-        ExpressionAttributeValues = mapAttrsToDictionary [ (":v_Id", ScalarString id') ]
-      )
-      |> client.QueryAsync
-      |> Async.AwaitTask
-      |> Async.RunSynchronously
-      |> fun r -> r.Items
-      |> List.ofSeq
-      |> List.map (Reader.run reader)
+      task {
+        let! response = 
+          QueryRequest (
+            TableName = tableName,
+            KeyConditionExpression = "EventId = :v_Id",
+            ExpressionAttributeValues = mapAttrsToDictionary [ (":v_Id", ScalarString id') ]
+          )
+          |> client.QueryAsync
+        
+        return response.Items
+          |> List.ofSeq
+          |> List.map (Reader.run reader)
+      }
 
     type EventSourceReader = Reader<Attributes,IEventSourcingEvent>
 

@@ -22,7 +22,8 @@ type EvtEnvelope = {
     Event: IEventSourcingEvent
 }
 
-type DomainHandler = CmdEnvelope -> Task<EvtEnvelope list> 
+type DomainHandler = CmdEnvelope -> Task<string list> 
 type DomainEvolver<'Event, 'State when 'Event :> IEventSourcingEvent> = 'State option -> 'Event -> 'State option
+
 
 

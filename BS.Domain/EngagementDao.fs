@@ -11,17 +11,21 @@ open System
 open System.IO
 open System.IO.Compression
 open System.Net
+open System.Threading.Tasks
+open FSharp.Control.Tasks.V2
 
 open BS.Domain
 open BS.Domain.EngagementManagement
 open BS.Domain.DAL.DataAccess
 open BS.Domain.DAL.EventEnvelopeDal
 open BS.Domain.DAL.EngagementEventDal
+open BS.Domain.Handlers
 
 type CreateEngagementRequest = EngagementCreatedDetails
 
 type EngagementDao (envDao:EventEnvelopeDao, client:AmazonDynamoDBClient) =
     let engagementsTable = "EngagementsTable"
+    let handle = EngagementHandlers.createHandler envDao
 
     let engagementToAttributes id (e:EngagementState)=
         [ ("EngagementId", ScalarString id)
@@ -53,30 +57,36 @@ type EngagementDao (envDao:EventEnvelopeDao, client:AmazonDynamoDBClient) =
         }
 
     member _.CreateEngagement (engagement:CreateEngagementRequest) = 
-        let id = ((Guid.NewGuid ()).ToString())
-        let evts = 
-            EngagementCommand.Create engagement 
-            |> envDao.EnvelopCommand id 
-            |> EngagementHandlers.handle
+        task {
+            let id = ((Guid.NewGuid ()).ToString())
+            let! results = 
+                EngagementCommand.Create engagement 
+                |> envDao.EnvelopCommand id 
+                |> handle
 
-        evts
-        |> envDao.InsertEventEnvelope 
-        |> fun result ->
-           match result with 
-           | Ok () -> id
-           | Error message -> failwith message
-        |> envDao.GetEnvelopes 
-        |> List.map (fun env -> env.Event :?> EngagementEvent)
-        |> List.fold evolve None        
-        |> Option.get
-        |> engagementToAttributes id
-        |> putItem client engagementsTable 
+            return results
+            // TODO Check for errors and raise them. 
+            // TODO Retrieve ids of objects, build state, and store state. 
+
+            // evts
+            // |> envDao.InsertEventEnvelope 
+            // |> fun result ->
+            //    match result with 
+            //    | Ok () -> id
+            //    | Error message -> failwith message
+            // |> envDao.GetEnvelopes 
+            // |> List.map (fun env -> env.Event :?> EngagementEvent)
+            // |> List.fold evolve None        
+            // |> Option.get
+            // |> engagementToAttributes id
+            // |> putItem client engagementsTable 
+        }
 
     member _.UpdateEngagement id version (engagement:EngagementCreatedDetails) = 
         let events = getItem
 
         Created engagement 
-        |> envDao.Envelop ((System.Guid.NewGuid ()).ToString()) "1" 
+        |> envDao.EnvelopEvent ((System.Guid.NewGuid ()).ToString()) "1" 
         |> envDao.InsertEventEnvelope 
 
 
