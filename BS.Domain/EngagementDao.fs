@@ -20,10 +20,10 @@ open BS.Domain.Handlers
 type CreateEngagementRequest = EngagementCreatedDetails
 
 type EngagementDao (envDao:EventEnvelopeDao, client:AmazonDynamoDBClient) =
-    // let engagementsTable = "EngagementsTable"
     let handle = EngagementHandlers.createHandler {
             EngagementHandlers.HandlerDependencies.InsertEventEnvelopesAsync = envDao.InsertEventEnvelopesAsync
-            GetEnvelopesAsync = envDao.GetEnvelopesAsync
+            BuildEngagementState = EventEnvelopeDal.buildState EngagementManagement.evolve envDao.GetEnvelopesAsync
+            BuildTroopState = EventEnvelopeDal.buildState TroopManagement.evolve envDao.GetEnvelopesAsync
             EnvelopEngagement = envDao.EnvelopEvent
             EnvelopTroop = envDao.EnvelopEvent
         }
@@ -67,6 +67,7 @@ type EngagementDao (envDao:EventEnvelopeDao, client:AmazonDynamoDBClient) =
 
             // TODO Retrieve ids of objects, build state, and store state. 
 
+            // let engagementsTable = "EngagementsTable"
             // evts
             // |> envDao.InsertEventEnvelope 
             // |> fun result ->

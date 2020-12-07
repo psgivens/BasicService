@@ -136,6 +136,7 @@ module EventEnvelopeDal =
 
 
     type EnvelopesFetcher = string -> Task<EvtEnvelope list>
+    type StateBuilder<'State> = string -> Task<string * 'State option>
     let buildState<'Event, 'State when 'Event :> IEventSourcingEvent> (evolver:DomainEvolver<'Event, 'State>) (getEnvelopesAsync:EnvelopesFetcher) id = 
         task {
             let! envs = getEnvelopesAsync id

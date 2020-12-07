@@ -12,8 +12,9 @@ open BS.Domain.DAL.EventEnvelopeDal
 
 module EngagementHandlers =
     type HandlerDependencies = {
+        BuildEngagementState:StateBuilder<EngagementState>
+        BuildTroopState:StateBuilder<TroopState>
         InsertEventEnvelopesAsync:InsertEventEnvelopesAsync
-        GetEnvelopesAsync:EnvelopesFetcher
         EnvelopEngagement:EnvelopEvent<EngagementEvent>
         EnvelopTroop:EnvelopEvent<TroopEvent>
     }
@@ -21,14 +22,12 @@ module EngagementHandlers =
         let postEnvelopesAsync = EventEnvelopeDal.postEnvelopesAsync ext.InsertEventEnvelopesAsync
         fun (cmdenv: CmdEnvelope) ->
             task {
-                let buildState = EventEnvelopeDal.buildState EngagementManagement.evolve ext.GetEnvelopesAsync
-                let! version, state = buildState cmdenv.Id 
+                let! version, state = ext.BuildEngagementState cmdenv.Id 
                 let envelopEngagement (e:EngagementEvent) = ext.EnvelopEngagement cmdenv.Id version e
 
                 let createEngagement id (details:EngagementCreatedDetails) = 
                     task {
-                        let buildState = EventEnvelopeDal.buildState TroopManagement.evolve ext.GetEnvelopesAsync
-                        let! troopVersion, _ = buildState cmdenv.Id
+                        let! troopVersion, _ = ext.BuildTroopState cmdenv.Id
                         let envelopTroop (e:TroopEvent) = ext.EnvelopTroop details.TroopId troopVersion e
 
                         return! 
