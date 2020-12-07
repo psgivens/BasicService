@@ -21,13 +21,14 @@ module EngagementHandlers =
         let postEnvelopesAsync = EventEnvelopeDal.postEnvelopesAsync ext.InsertEventEnvelopesAsync
         fun (cmdenv: CmdEnvelope) ->
             task {
-                let buildState = EventEnvelopeDal.buildState EngagementManagement.evolve
-                let! version, state = buildState ext.GetEnvelopesAsync cmdenv.Id 
+                let buildState = EventEnvelopeDal.buildState EngagementManagement.evolve ext.GetEnvelopesAsync
+                let! version, state = buildState cmdenv.Id 
                 let envelopEngagement (e:EngagementEvent) = ext.EnvelopEngagement cmdenv.Id version e
 
                 let createEngagement id (details:EngagementCreatedDetails) = 
                     task {
-                        let! troopVersion, _ = EventEnvelopeDal.buildState TroopManagement.evolve ext.GetEnvelopesAsync cmdenv.Id
+                        let buildState = EventEnvelopeDal.buildState TroopManagement.evolve ext.GetEnvelopesAsync
+                        let! troopVersion, _ = buildState cmdenv.Id
                         let envelopTroop (e:TroopEvent) = ext.EnvelopTroop details.TroopId troopVersion e
 
                         return! 
@@ -54,21 +55,21 @@ module TroopHandlers =
         EnvelopEvent:EnvelopEvent<TroopEvent>
     }
     let createHandler (ext:HandlerDependencies) : DomainHandler =         
-        let postEnvelopes = EventEnvelopeDal.postEnvelopesAsync ext.InsertEventEnvelopesAsync
+        let postEnvelopesAsync = EventEnvelopeDal.postEnvelopesAsync ext.InsertEventEnvelopesAsync
         fun (cmdenv: CmdEnvelope) ->
             task {
-                let buildState = EventEnvelopeDal.buildState TroopManagement.evolve
-                let! version, state = buildState ext.GetEnvelopesAsync cmdenv.Id
+                let buildState = EventEnvelopeDal.buildState TroopManagement.evolve ext.GetEnvelopesAsync
+                let! version, state = buildState cmdenv.Id
                 let envelopTroop (e:TroopEvent) = ext.EnvelopEvent cmdenv.Id version e
 
                 return! 
                     match state, cmdenv.Command :?> TroopCommand with 
                     | None, TroopCommand.Create details -> 
                         [ TroopEvent.Created details |> envelopTroop ] 
-                        |> postEnvelopes
+                        |> postEnvelopesAsync
                     | Some _, TroopCommand.Update details -> 
                         [ TroopEvent.Updated details |> envelopTroop ]
-                        |> postEnvelopes
+                        |> postEnvelopesAsync
                     | _,_ -> failwith "invalid command"
             }
 
