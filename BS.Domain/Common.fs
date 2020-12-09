@@ -16,7 +16,7 @@ type CmdEnvelope = {
 
 type EvtEnvelope = {
     Id:string
-    Version:string
+    Version:int
     UserName:string
     TimeStamp:string
     Event: IEventSourcingEvent

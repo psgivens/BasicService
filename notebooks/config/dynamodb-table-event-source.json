@@ -11,7 +11,7 @@
     },
     {
       "AttributeName": "EventVersion",
-      "AttributeType": "S"
+      "AttributeType": "N"
     }
   ],
   "KeySchema": [

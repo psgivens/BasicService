@@ -14,12 +14,11 @@ module EngagementHandlers =
     type HandlerDependencies = {
         BuildEngagementState:StateBuilder<EngagementState>
         BuildTroopState:StateBuilder<TroopState>
-        InsertEventEnvelopesAsync:InsertEventEnvelopesAsync
+        PostEnvelopesAsync: EvtEnvelope list -> Task<string list>
         EnvelopEngagement:EnvelopEvent<EngagementEvent>
         EnvelopTroop:EnvelopEvent<TroopEvent>
     }
-    let createHandler (ext:HandlerDependencies) : DomainHandler=         
-        let postEnvelopesAsync = EventEnvelopeDal.postEnvelopesAsync ext.InsertEventEnvelopesAsync
+    let createHandler (ext:HandlerDependencies) : DomainHandler =
         fun (cmdenv: CmdEnvelope) ->
             task {
                 let! version, state = ext.BuildEngagementState cmdenv.Id 
@@ -33,12 +32,12 @@ module EngagementHandlers =
                         return! 
                             [ EngagementEvent.Created details |> envelopEngagement
                               TroopEvent.EngagementAdded id |> envelopTroop ]
-                            |> postEnvelopesAsync
+                            |> ext.PostEnvelopesAsync
                     }
 
                 let updateEngagement (details:EngagementUpdatedDetails) = 
                     [ EngagementEvent.Updated details |> envelopEngagement ] 
-                    |> postEnvelopesAsync
+                    |> ext.PostEnvelopesAsync
                     
                 return! 
                     match state, cmdenv.Command :?> EngagementCommand with 

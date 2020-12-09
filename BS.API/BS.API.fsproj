@@ -5,7 +5,6 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\BS.Domain\BS.Domain.fsproj" />
-    <ProjectReference Include="..\BS.Domain.DAL\BS.Domain.DAL.fsproj" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="EngagementController.fs" />

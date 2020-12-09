@@ -46,7 +46,7 @@ module EventEnvelopeDal =
 
         let eventToAttributes (ee:EvtEnvelope) =
             [ ("EventId", ScalarString ee.Id)
-              ("EventVersion", ScalarString ee.Version)          
+              ("EventVersion", ScalarDecimal (decimal ee.Version))          
               ("UserName", ScalarString ee.UserName)
               ("TimeStamp", ScalarString ee.TimeStamp)
               ("Type", ScalarString (eventToTypeName ee.Event))
@@ -79,7 +79,7 @@ module EventEnvelopeDal =
         let readEnvelope =
             Reader.withBuilder buildEnvelope
             |> Reader.readString "EventId"
-            |> Reader.readString "EventVersion"
+            |> Reader.readNumber "EventVersion" int
             |> Reader.readString "UserName"
             |> Reader.readString "TimeStamp"
             |> Reader.selectNestedReader "Event" getEventReader
@@ -128,7 +128,7 @@ module EventEnvelopeDal =
             }
 
     type EnvelopCommand = string -> IEventSourcingCommand -> CmdEnvelope
-    type EnvelopEvent<'Event when 'Event:>IEventSourcingEvent> = string -> string -> 'Event -> EvtEnvelope
+    type EnvelopEvent<'Event when 'Event:>IEventSourcingEvent> = string -> int -> 'Event -> EvtEnvelope
 
     type EventEnvelopeDaoFactory = AmazonDynamoDBClient -> string -> EventEnvelopeDao
     let createEventEnvelopeFactory (eventConverters:IEventConverter list) : EventEnvelopeDaoFactory=
@@ -136,15 +136,18 @@ module EventEnvelopeDal =
 
 
     type EnvelopesFetcher = string -> Task<EvtEnvelope list>
-    type StateBuilder<'State> = string -> Task<string * 'State option>
+    type StateBuilder<'State> = string -> Task<int * 'State option>
     let buildState<'Event, 'State when 'Event :> IEventSourcingEvent> (evolver:DomainEvolver<'Event, 'State>) (getEnvelopesAsync:EnvelopesFetcher) id = 
         task {
             let! envs = getEnvelopesAsync id
             let version = 
-                envs
-                |> List.maxBy (fun env -> int env.Version)
-                |> fun env -> int env.Version
-                |> fun version -> ((version+1).ToString ())
+                match envs with
+                | [] -> 1
+                | _ ->
+                    envs
+                    |> List.maxBy (fun env -> int env.Version)
+                    |> fun env -> env.Version
+                    |> fun version -> version+1
             let state = 
                 envs
                 |> List.map (fun env -> env.Event :?> 'Event)

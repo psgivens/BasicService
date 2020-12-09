@@ -21,7 +21,7 @@ type CreateEngagementRequest = EngagementCreatedDetails
 
 type EngagementDao (envDao:EventEnvelopeDao, client:AmazonDynamoDBClient) =
     let handle = EngagementHandlers.createHandler {
-            EngagementHandlers.HandlerDependencies.InsertEventEnvelopesAsync = envDao.InsertEventEnvelopesAsync
+            EngagementHandlers.HandlerDependencies.PostEnvelopesAsync = EventEnvelopeDal.postEnvelopesAsync envDao.InsertEventEnvelopesAsync
             BuildEngagementState = EventEnvelopeDal.buildState EngagementManagement.evolve envDao.GetEnvelopesAsync
             BuildTroopState = EventEnvelopeDal.buildState TroopManagement.evolve envDao.GetEnvelopesAsync
             EnvelopEngagement = envDao.EnvelopEvent
@@ -88,5 +88,5 @@ type EngagementDao (envDao:EventEnvelopeDao, client:AmazonDynamoDBClient) =
         let events = getItem
 
         Created engagement 
-        |> envDao.EnvelopEvent ((System.Guid.NewGuid ()).ToString()) "1" 
+        |> envDao.EnvelopEvent ((System.Guid.NewGuid ()).ToString()) 1
         |> envDao.InsertEventEnvelopeAsync 
