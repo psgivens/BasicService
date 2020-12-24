@@ -1,0 +1,54 @@
+
+
+
+types:
+  CTI:
+    Category: string
+    Type: string
+    Item: string
+  TroopCreateDetails:
+    CustomerName: string
+    ProjectName: string
+    SfdcProjectId: string
+    SfdcProjectSlug: string
+    SecurityOwner: string
+    Team: string
+    Cti: !Ref CTI
+    TroopId: string    
+  TroopUpdateDetails:
+    CustomerName: string option
+    ProjectName: string option
+    SfdcProjectId: string option
+    SfdcProjectSlug: string option
+    SecurityOwner: string option
+    Team: string option    
+    Cti: !Ref CTI option
+  TroopCreatedDetails: !Ref TroopCreateDetails
+  TroopUpdatedDetails: !Ref TroopUpdateDetails
+  TroopState:
+    CustomerName: string 
+    ProjectName: string 
+    SfdcProjectId: string 
+    SfdcProjectSlug: string 
+    SecurityOwner: string 
+    Team: string  
+    Cti: !Ref CTI 
+    TroopId: string
+
+domains:
+  Troop:
+    commands:
+      Create: 
+        data: !Ref TroopCreatedDetails
+        handler: !MapEvent Created
+      Update: 
+        data: !Ref TroopUpdatedDetails
+        handler: !MapEvent Updated
+      AssignCTI:
+        data: CTI
+        handler: !InvokeStub handleCti
+    events:
+      Created: !Ref TroopCreatedDetails
+      Updated: !Ref TroopUpdatedDetails
+    state: !Ref TroopState
+    folder: !InvokeStub evolve
