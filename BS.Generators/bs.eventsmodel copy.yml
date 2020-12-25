@@ -2,29 +2,29 @@
 
 
 types:
-  CTI: &cti
+  CTI:
     Category: string
     Type: string
     Item: string
-  TroopCreateDetails: &troopCreateDetails
+  TroopCreateDetails:
     CustomerName: string
     ProjectName: string
     SfdcProjectId: string
     SfdcProjectSlug: string
     SecurityOwner: string
     Team: string
-    Cti: *cti
+    Cti: !Ref CTI
     TroopId: string    
-  TroopUpdateDetails: &troopUpdateDetails
+  TroopUpdateDetails:
     CustomerName: string option
     ProjectName: string option
     SfdcProjectId: string option
     SfdcProjectSlug: string option
     SecurityOwner: string option
     Team: string option    
-    Cti: CTI option
-  TroopCreatedDetails: *troopCreateDetails 
-  TroopUpdatedDetails: *troopUpdateDetails
+    Cti: !Ref CTI option
+  TroopCreatedDetails: !Ref TroopCreateDetails
+  TroopUpdatedDetails: !Ref TroopUpdateDetails
   TroopState:
     CustomerName: string 
     ProjectName: string 
@@ -32,23 +32,23 @@ types:
     SfdcProjectSlug: string 
     SecurityOwner: string 
     Team: string  
-    Cti: CTI 
+    Cti: !Ref CTI 
     TroopId: string
 
 domains:
   Troop:
     commands:
       Create: 
-        data: TroopCreatedDetails
-        handler: !EmitEvent Created
+        data: !Ref TroopCreatedDetails
+        handler: !MapEvent Created
       Update: 
-        data: TroopUpdatedDetails
-        handler: !EmitEvent Updated
+        data: !Ref TroopUpdatedDetails
+        handler: !MapEvent Updated
       AssignCTI:
         data: CTI
-        handler: !InvokeHandler handleCti
+        handler: !InvokeStub handleCti
     events:
-      Created: TroopCreatedDetails
-      Updated: TroopUpdatedDetails
-    state: TroopState
-    folder: evolve
+      Created: !Ref TroopCreatedDetails
+      Updated: !Ref TroopUpdatedDetails
+    state: !Ref TroopState
+    folder: !InvokeStub evolve
